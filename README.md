@@ -1,16 +1,16 @@
 # Gravity Run Club — Portal del Atleta
 
-Sistema de gestión de planes de entrenamiento y feedback para una escuela de running real (Gravity Run Club, Buenos Aires), construido de cero para reemplazar un flujo manual de Excel + WhatsApp por un modelo de datos relacional con autenticación, automatización de carga y seguimiento de progreso.
+Sistema de gestión de planes de entrenamiento y feedback para un equipo de running real (Gravity Run Club, Buenos Aires), construido de cero para reemplazar un flujo manual de Excel + WhatsApp por un modelo de datos relacional con autenticación, automatización de carga y seguimiento de progreso.
 
 > **Nota sobre este repo:** el código y el esquema son los reales de producción. Los datos de atletas fueron reemplazados por un roster ficticio (`data/roster_ficticio.sql`) y las credenciales por placeholders — ver `src/` y `edge-functions/`.
 
 ## El problema
 
-El entrenador (Eze) diseñaba los planes semanales de ~28 atletas en Excel y los enviaba uno por uno por WhatsApp. No había forma de que un atleta viera su historial, ni de que el coach supiera si alguien venía cumpliendo o abandonando el plan sin preguntarle directamente. Cada plan nuevo significaba repetir el envío manual, semana tras semana, por atleta.
+El entrenador diseñaba los planes semanales de ~50 atletas en Excel y los enviaba uno por uno por WhatsApp. No había forma de que un atleta viera su historial, ni de que el coach supiera si alguien venía cumpliendo o abandonando el plan sin preguntarle directamente. Cada plan nuevo significaba repetir el envío manual, semana tras semana, por atleta.
 
 ## Por qué se construyó de cero
 
-El sitio de Gravity Run Club ya existía desde 2019 como landing estático — sin ninguna capa de datos detrás. La decisión no fue "agregarle funciones" a ese landing, sino diseñar un modelo relacional aparte que representara cómo trabaja el equipo realmente: subgrupos por distancia, atletas que combinan running y fuerza en proporciones distintas, planes que cambian semana a semana pero un historial que no se pierde nunca. Migrar un sitio estático no resuelve eso — hacía falta una base de datos.
+El sitio de Gravity Run Club ya existía desde 2019 como landing estático — sin ninguna capa de datos detrás. La decisión no fue "agregarle funciones" a ese landing, sino diseñar un modelo relacional aparte que representara cómo trabaja el equipo realmente: subgrupos por distancia, atletas que combinan running y preparación física en proporciones distintas, planes que cambian semana a semana pero un historial que no se pierde nunca. Migrar un sitio estático no resuelve eso, hacía falta una base de datos.
 
 ## Arquitectura
 
@@ -41,7 +41,7 @@ flowchart TB
     G -.-> E
 ```
 
-**Dos caminos de acceso muy distintos, a propósito:** el coach entra con usuario/contraseña real (Supabase Auth) y tiene permiso total vía RLS. El atleta entra con un PIN de 4 dígitos pensado para uso casual desde el celular — no tiene ninguna política RLS propia; todo pasa por la Edge Function `plan-atleta`, que valida el PIN a mano y aplica rate limiting (5 intentos → bloqueo de 15 minutos) antes de tocar la base.
+**Dos caminos de acceso muy distintos, a propósito:** el coach entra con usuario/contraseña real (Supabase Auth) y tiene permiso total vía RLS. El atleta entra con un PIN de 4 dígitos pensado para uso casual desde el celular, no tiene ninguna política RLS propia; todo pasa por la Edge Function `plan-atleta`, que valida el PIN a mano y aplica rate limiting (5 intentos → bloqueo de 15 minutos) antes de tocar la base.
 
 ## Modelo de datos
 
@@ -89,15 +89,15 @@ erDiagram
     }
 ```
 
-**Decisión clave:** las tablas se dividen en dos familias con ciclos de vida distintos. `planes_semanales` / `planes_fuerza_semanales` son contenido editorial — lo que el coach *pidió* — y se borran automáticamente a los 30 días vía `pg_cron` para no acumular basura. `registro_entrenamientos` / `registro_pesos` / `marcas_historial` son histórico real — lo que el atleta *efectivamente hizo* — y no se borran nunca. Mezclar ambas cosas en una sola tabla hubiera obligado a elegir entre perder el historial o acumular planes viejos indefinidamente.
+**Decisión clave:** las tablas se dividen en dos familias con ciclos de vida distintos. `planes_semanales` / `planes_fuerza_semanales` y se borran automáticamente a los 30 días vía `pg_cron` para no acumular basura. `registro_entrenamientos` / `registro_pesos` / `marcas_historial` son histórico real (lo que el atleta *efectivamente hizo*) y no se borran nunca. Mezclar ambas cosas en una sola tabla hubiera obligado a elegir entre perder el historial o acumular planes viejos indefinidamente.
 
-El modelo de atleta también combina dos ejes independientes (`tiene_running` boolean + `nivel_fuerza` enum) en vez de un tipo único, porque en la realidad un atleta puede correr y hacer fuerza a la vez, en cualquier combinación — ver `sql/01_schema.sql` para el detalle de por qué había un campo `tipo_plan` legacy que este modelo reemplazó.
+El modelo de atleta también combina dos ejes independientes (`tiene_running` boolean + `nivel_fuerza` enum) en vez de un tipo único, porque en la realidad un atleta puede correr y hacer entrenamiento de fuerza a la vez, en cualquier combinación — ver `sql/01_schema.sql` para el detalle de por qué había un campo `tipo_plan` legacy que este modelo reemplazó.
 
 ## Cómo se construyó — línea de tiempo
 
-1. **Diseño del esquema** desde cero, sobre el modelo real de subgrupos y planes de Eze (no sobre el landing viejo).
+1. **Diseño del esquema** desde cero, sobre el modelo real de subgrupos y planes de entrenamiento (no sobre el landing viejo).
 2. **Autenticación del atleta** vía Edge Function (slug + PIN), con rate limiting.
-3. **Carga automatizada de planillas**: el coach sigue trabajando en Excel — el sistema detecta el tipo de plan por el nombre de la hoja, matchea atletas por nombre (con sugerencias por distancia de Levenshtein si hay un typo), detecta filas duplicadas dentro del mismo archivo, y borra + reinserta por semana para evitar filas huérfanas.
+3. **Carga automatizada de planillas**: el coach sigue trabajando en Excel y el sistema detecta el tipo de plan por el nombre de la hoja, matchea atletas por nombre (con sugerencias por distancia de Levenshtein si hay un typo), detecta filas duplicadas dentro del mismo archivo, y borra + reinserta por semana para evitar filas huérfanas.
 4. **Sistema de feedback**: se extendió la Edge Function original (que solo devolvía el plan) para traer también el historial completo de progreso, y se agregó la pestaña "Progreso" al portal con feedback de ritmo por sesión y notas del entrenador.
 5. **Sistema de notificaciones push**, en dos partes separadas por el tiempo: primero se construyó la suscripción (el atleta acepta desde el botón "Avisame los días que tengo entreno", la tabla `push_subscripciones` se puebla) y bastante después la función que efectivamente envía el push, con tres disparadores distintos (recordatorio diario, plan nuevo, nota del coach) y limpieza automática de suscripciones vencidas.
 6. **PWA instalable**, para que el atleta lo tenga como un ícono más en el celular en vez de un link perdido en un chat de WhatsApp.
@@ -122,7 +122,7 @@ Esta sección es literalmente el orden en el que fueron apareciendo los problema
 
 **Matching de nombres al subir el Excel:** con ~28 atletas y typos ocasionales en la planilla, un matching exacto de texto generaba fallas silenciosas — un atleta se quedaba sin plan esa semana, sin que nadie lo notara hasta que preguntaba por WhatsApp. Se agregó sugerencia por distancia de Levenshtein para detectar el candidato más probable y avisar antes de publicar, además de detección de filas duplicadas dentro del mismo archivo.
 
-**El recordatorio diario por push no cubre a los atletas de fuerza pura, y es a propósito, no un descuido.** El disparador que avisa "hoy tenés entreno" solo consulta `planes_semanales`, la única tabla con estructura por día de la semana. `planes_fuerza_semanales` se organiza por bloque, sin día fijo asociado — y no es que faltó modelarlo: los días de entreno de fuerza varían de atleta a atleta y no siguen un calendario semanal fijo como sí lo hace running, así que forzarle una estructura de "día de la semana" al modelo hubiera sido inventar una regularidad que no existe en la realidad del club. Hoy el grupo de atletas de fuerza pura es chico, así que el costo de esta brecha es bajo — queda anotado como algo a revisar si ese grupo creciera y la falta del recordatorio empezara a pesar más.
+**El recordatorio diario por push no cubre a los atletas de preparación física, y es a propósito, no un descuido.** El disparador que avisa "hoy tenés entreno" solo consulta `planes_semanales`, la única tabla con estructura por día de la semana. `planes_fuerza_semanales` se organiza por bloque, sin día fijo asociado — y no es que faltó modelarlo: los días de entreno de fuerza varían de atleta a atleta y no siguen un calendario semanal fijo como sí lo hace running, así que forzarle una estructura de "día de la semana" al modelo hubiera sido inventar una regularidad que no existe en la realidad del club. Hoy el grupo de atletas de fuerza pura es chico, así que el costo de esta brecha es bajo — queda anotado como algo a revisar si ese grupo creciera y la falta del recordatorio empezara a pesar más.
 
 **Las suscripciones push se limpian solas.** Cuando un endpoint de suscripción devuelve 410 o 404 al intentar enviarle (el atleta reinstaló la app, borró datos del sitio, etc.), la función de notificaciones borra esa fila de `push_subscripciones` en el momento, en vez de seguir intentando enviarle para siempre a una suscripción muerta.
 
