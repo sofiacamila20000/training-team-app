@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Run Club — Seguimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --teal: #12C0AE; --blue: #2E3AC0; --blue-deep: #1A1F6E; --fuerza: #4C2E8F;
+    --brand: #2E3AC0; --brand-2: #1A1F6E;
+    --ink: #0B1024; --paper: #F2F6F8; --card: #ffffff; --line: #E4E9ED; --muted: #5C6470;
+    --ok: #1E7A46; --ok-bg: #e7f2e6; --warn: #a86412; --warn-bg: #fbf0dd;
+    --z-debajo: #B3651A; --z-rango: #0B8F82; --z-encima: #4C2E8F;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E4E9ED; font-family: 'Nunito', sans-serif; display: flex; justify-content: center; padding: 32px 16px; }
+  .app { width: 100%; max-width: 760px; background: var(--paper); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(16,35,63,0.18); }
+  .topbar { background: linear-gradient(135deg, var(--teal), var(--blue) 68%, var(--blue-deep)); color: #fff; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; color: #bcd0f2; }
+  .crumb { font-size: 13px; color: #cddaf0; margin-top: 2px; }
+  .back-btn { font-family: 'Nunito'; font-weight: 700; font-size: 13px; color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); padding: 7px 13px; border-radius: 20px; text-decoration: none; white-space: nowrap; }
+  .back-btn:hover { background: rgba(255,255,255,.3); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--brand-2); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+
+  .content { padding: 28px; }
+  h1 { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .subtitle { font-size: 13.5px; color: var(--muted); margin: 0 0 20px; }
+
+  .filtros { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .filtro-btn { font-family:'Nunito'; font-weight:700; font-size:12.5px; padding:8px 14px; border-radius:20px; border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; }
+  .filtro-btn.active { background:var(--brand); color:#fff; border-color:var(--brand); }
+
+  #vacio { text-align:center; padding:50px 20px; color:var(--muted); font-size:13.5px; }
+
+  .item-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; }
+  .item-card.no-visto { border-left: 3px solid var(--brand); background: #F7F9FE; }
+  .item-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .item-avatar { width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--blue)); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Baloo 2'; font-weight:700; font-size:12.5px; flex-shrink:0; }
+  .item-avatar.fuerza { background:linear-gradient(135deg,var(--fuerza),#2E1A5C); }
+  .item-info { flex:1; min-width:0; }
+  .item-nombre { font-weight:800; font-size:14px; color:var(--ink); }
+  .item-meta { font-size:11.5px; color:var(--muted); margin-top:1px; font-family:'JetBrains Mono'; }
+  .item-nuevo-pill { font-size:9.5px; font-weight:800; color:#fff; background:var(--brand); padding:2px 8px; border-radius:10px; font-family:'JetBrains Mono'; letter-spacing:.03em; }
+
+  .item-datos { display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; margin:8px 0; }
+  .item-dato b { color:var(--ink); font-family:'JetBrains Mono'; }
+  .ritmo-tag { font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:12px; font-family:'JetBrains Mono'; }
+  .ritmo-tag.debajo { color:var(--z-debajo); background:#FCF0DE; }
+  .ritmo-tag.en_rango { color:var(--z-rango); background:#E3F8F6; }
+  .ritmo-tag.encima { color:var(--z-encima); background:#EEE8FA; }
+
+  .item-obs { font-size:13px; color:var(--ink); font-style:italic; background:var(--paper); border-radius:8px; padding:8px 10px; margin-top:8px; }
+  .item-pesos { font-size:12.5px; color:var(--muted); margin-top:6px; }
+  .item-pesos b { color:var(--ink); }
+
+  .item-foot { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .visto-btn { font-family:'Nunito'; font-weight:700; font-size:12px; background:var(--paper); border:1px solid var(--line); color:var(--blue-deep); padding:6px 13px; border-radius:20px; cursor:pointer; }
+  .nota-btn { font-family:'Nunito'; font-weight:700; font-size:12px; background:transparent; border:none; color:var(--brand); cursor:pointer; padding:0; }
+  .nota-box { margin-top:10px; background:var(--paper); border-radius:10px; padding:10px 12px; display:none; }
+  .nota-box textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:'Nunito'; font-size:13px; resize:vertical; box-sizing:border-box; }
+  .nota-box .nota-save { margin-top:8px; background:var(--brand); color:#fff; border:none; padding:7px 14px; border-radius:20px; font-family:'Nunito'; font-weight:700; font-size:12px; cursor:pointer; }
+  .nota-msg { font-size:11.5px; margin-top:6px; }
+  .ya-visto { font-size:11.5px; color:var(--ok); font-weight:700; }
+
+  #loadMoreBtn { display:block; width:100%; margin-top:8px; background:var(--card); border:1px solid var(--line); color:var(--muted); font-family:'Nunito'; font-weight:700; font-size:13px; padding:11px; border-radius:10px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="perfil-entrenador.html" class="back-btn">← Panel</a>
+      <div>
+        <div class="brand">GRAVITY RUN CLUB · PANEL DEL COACH</div>
+        <div class="crumb">Seguimiento</div>
+      </div>
+    </div>
+    <div class="avatar">ES</div>
+  </div>
+
+  <div class="content">
+
+    <div id="loginBox">
+      <h1>Ingresar</h1>
+      <p class="subtitle">Iniciá sesión para ver el seguimiento de los atletas.</p>
+      <div style="max-width:340px;">
+        <input id="loginEmail" type="email" placeholder="Email" style="width:100%; padding:11px 13px; margin-bottom:10px; border:1px solid var(--line); border-radius:10px; font-size:13.5px;">
+        <input id="loginPass" type="password" placeholder="Contraseña" style="width:100%; padding:11px 13px; margin-bottom:14px; border:1px solid var(--line); border-radius:10px; font-size:13.5px;">
+        <button class="btn" style="width:100%; background:var(--brand); color:#fff; padding:11px; border:none; border-radius:10px; font-weight:700; cursor:pointer;" onclick="iniciarSesion()">Ingresar</button>
+        <div id="loginError" style="color:#9c2f24; font-size:12.5px; margin-top:10px; display:none;"></div>
+      </div>
+    </div>
+
+    <div id="mainApp" style="display:none;">
+      <h1>Seguimiento de atletas</h1>
+      <p class="subtitle">Lo que van completando y comentando de sus entrenos — más reciente primero.</p>
+
+      <div class="filtros">
+        <button class="filtro-btn active" id="filtroNoVistos" onclick="cambiarFiltro('no_vistos')">No vistos</button>
+        <button class="filtro-btn" id="filtroTodos" onclick="cambiarFiltro('todos')">Todos</button>
+      </div>
+
+      <div id="lista"></div>
+      <div id="vacio" style="display:none;"></div>
+      <button id="loadMoreBtn" style="display:none;" onclick="cargarMas()">Cargar más</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function iniciarSesion() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'none';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      errBox.textContent = 'No pudimos iniciar sesión: ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    mostrarApp();
+  }
+
+  function mostrarApp() {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    cargarSeguimiento();
+  }
+
+  sb.auth.getSession().then(({ data }) => { if (data.session) mostrarApp(); });
+
+  // ------------------------------------------------------------
+  const PAGE_SIZE = 25;
+  let filtroActual = 'no_vistos';
+  let pagina = 0;
+  let atletasPorId = {};
+
+  function cambiarFiltro(f){
+    filtroActual = f;
+    pagina = 0;
+    document.getElementById('filtroNoVistos').classList.toggle('active', f==='no_vistos');
+    document.getElementById('filtroTodos').classList.toggle('active', f==='todos');
+    cargarSeguimiento();
+  }
+
+  function initials(name){ return (name||'').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+  function iconoTipo(tipo){
+    return tipo === 'fuerza'
+      ? '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12"/><rect x="1.5" y="9" width="3.5" height="6" rx="1"/><rect x="19" y="9" width="3.5" height="6" rx="1"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M13 5l-1.5 5L16 12l-2 7"/><circle cx="15" cy="4" r="1.5" fill="currentColor" stroke="none"/><path d="M9 12l-4 2 1 4"/></svg>';
+  }
+
+  function formatFecha(fechaISO){
+    const d = new Date(fechaISO+'T00:00:00');
+    return d.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+  }
+
+  async function cargarSeguimiento(){
+    const lista = document.getElementById('lista');
+    const vacio = document.getElementById('vacio');
+    if(pagina === 0) lista.innerHTML = '<p style="color:var(--muted); font-size:13px;">Cargando…</p>';
+
+    let q = sb.from('registro_entrenamientos').select('*').order('fecha', { ascending: false }).order('creado_en', { ascending: false });
+    if(filtroActual === 'no_vistos') q = q.eq('visto', false);
+    q = q.range(pagina * PAGE_SIZE, pagina * PAGE_SIZE + PAGE_SIZE - 1);
+
+    const { data: registros, error } = await q;
+    if(error){ lista.innerHTML = '<p style="color:#9c2f24;">Error cargando el seguimiento.</p>'; return; }
+
+    if(pagina === 0 && !registros.length){
+      lista.innerHTML = '';
+      vacio.style.display = 'block';
+      vacio.textContent = filtroActual === 'no_vistos' ? '¡Al día! No hay nada nuevo por revisar.' : 'Todavía no hay ningún entreno marcado como hecho.';
+      document.getElementById('loadMoreBtn').style.display = 'none';
+      return;
+    }
+    vacio.style.display = 'none';
+
+    const idsAtletas = [...new Set(registros.map(r=>r.atleta_id))];
+    const faltanAtletas = idsAtletas.filter(id => !atletasPorId[id]);
+    if(faltanAtletas.length){
+      const { data: atletas } = await sb.from('atletas').select('id,nombre').in('id', faltanAtletas);
+      (atletas||[]).forEach(a => atletasPorId[a.id] = a.nombre);
+    }
+
+    const fuerzaKeys = registros.filter(r=>r.tipo==='fuerza').map(r=>({atleta_id:r.atleta_id, fecha:r.fecha}));
+    let pesosPorClave = {};
+    if(fuerzaKeys.length){
+      const idsF = [...new Set(fuerzaKeys.map(k=>k.atleta_id))];
+      const { data: pesos } = await sb.from('registro_pesos').select('*').in('atleta_id', idsF);
+      (pesos||[]).forEach(p => {
+        const key = p.atleta_id+'|'+p.fecha;
+        (pesosPorClave[key] = pesosPorClave[key] || []).push(p);
+      });
+    }
+
+    if(pagina === 0) lista.innerHTML = '';
+    registros.forEach(r => {
+      const nombre = atletasPorId[r.atleta_id] || 'Atleta';
+      const esFuerza = r.tipo === 'fuerza';
+      const pesos = pesosPorClave[r.atleta_id+'|'+r.fecha] || [];
+
+      const ritmoLabel = {debajo:'Por debajo', en_rango:'En rango', encima:'Por encima'}[r.ritmo_feedback];
+      const rango = (r.dist_min_km || r.dist_max_km) ? `${r.dist_min_km||'?'}${r.dist_max_km&&r.dist_max_km!=r.dist_min_km?'–'+r.dist_max_km:''}k pedidos` : '';
+
+      const card = document.createElement('div');
+      card.className = 'item-card' + (!r.visto ? ' no-visto' : '');
+      card.innerHTML = `
+        <div class="item-head">
+          <div class="item-avatar${esFuerza?' fuerza':''}">${initials(nombre)}</div>
+          <div class="item-info">
+            <div class="item-nombre">${nombre} ${!r.visto?'<span class="item-nuevo-pill">NUEVO</span>':''}</div>
+            <div class="item-meta">${iconoTipo(r.tipo)} ${esFuerza?'Fuerza':'Running'} · ${formatFecha(r.fecha)} · ${r.completado?'Completado':'Sin completar'}</div>
+          </div>
+        </div>
+        <div class="item-datos">
+          ${r.km_reales!=null?`<span class="item-dato"><b>${r.km_reales}k</b> reales${rango?` <span style="color:var(--muted);">(${rango})</span>`:''}</span>`:''}
+          ${ritmoLabel?`<span class="ritmo-tag ${r.ritmo_feedback}">${ritmoLabel}</span>`:''}
+        </div>
+        ${r.observacion?`<div class="item-obs">"${r.observacion}"</div>`:''}
+        ${pesos.length?`<div class="item-pesos">${pesos.map(p=>`<b>${p.ejercicio}:</b> ${p.peso_logrado}kg`).join(' · ')}</div>`:''}
+        <div class="item-foot">
+          ${r.visto
+            ? '<span class="ya-visto">✓ Ya visto</span>'
+            : `<button class="visto-btn" onclick="marcarVisto('${r.id}', this)">Marcar visto</button>`}
+          <button class="nota-btn" onclick="toggleNota(this, '${r.atleta_id}', '${nombre.replace(/'/g,"\\'")}')">💬 Dejar nota</button>
+        </div>
+        <div class="nota-box">
+          <textarea rows="3" placeholder="Tu devolución de esta semana para ${nombre}..."></textarea>
+          <button class="nota-save" onclick="guardarNotaDesdeSeguimiento(this, '${r.atleta_id}')">Guardar nota</button>
+          <div class="nota-msg"></div>
+        </div>`;
+      lista.appendChild(card);
+    });
+
+    document.getElementById('loadMoreBtn').style.display = registros.length === PAGE_SIZE ? 'block' : 'none';
+  }
+
+  function cargarMas(){ pagina++; cargarSeguimiento(); }
+
+  async function marcarVisto(id, btnEl){
+    btnEl.disabled = true; btnEl.textContent = '...';
+    const { error } = await sb.from('registro_entrenamientos').update({ visto: true }).eq('id', id);
+    if(error){ btnEl.disabled = false; btnEl.textContent = 'Marcar visto'; return; }
+    if(filtroActual === 'no_vistos'){
+      btnEl.closest('.item-card').remove();
+    } else {
+      const span = document.createElement('span');
+      span.className = 'ya-visto';
+      span.textContent = '✓ Ya visto';
+      btnEl.replaceWith(span);
+      btnEl.closest('.item-card').classList.remove('no-visto');
+    }
+  }
+
+  function lunesDeEstaSemana(){
+    const d = new Date();
+    const diaSemana = d.getDay();
+    const offset = diaSemana === 0 ? -6 : 1 - diaSemana;
+    d.setDate(d.getDate() + offset);
+    return d.toISOString().slice(0,10);
+  }
+
+  async function toggleNota(btnEl, atletaId, nombre){
+    const box = btnEl.closest('.item-card').querySelector('.nota-box');
+    const abrir = box.style.display !== 'block';
+    box.style.display = abrir ? 'block' : 'none';
+    if(abrir && !box.dataset.cargado){
+      box.dataset.cargado = '1';
+      const semanaISO = lunesDeEstaSemana();
+      const { data } = await sb.from('observaciones_mensuales').select('texto').eq('atleta_id', atletaId).eq('semana_inicio', semanaISO).maybeSingle();
+      if(data?.texto) box.querySelector('textarea').value = data.texto;
+    }
+  }
+
+  async function guardarNotaDesdeSeguimiento(btnEl, atletaId){
+    const box = btnEl.closest('.nota-box');
+    const texto = box.querySelector('textarea').value.trim();
+    const msg = box.querySelector('.nota-msg');
+    if(!texto){ msg.style.color='#9c2f24'; msg.textContent='Escribí algo antes de guardar.'; return; }
+
+    const semanaISO = lunesDeEstaSemana();
+
+    btnEl.disabled = true; btnEl.textContent = 'Guardando…';
+    const { error } = await sb.from('observaciones_mensuales').upsert({
+      atleta_id: atletaId, semana_inicio: semanaISO, texto,
+    }, { onConflict: 'atleta_id,semana_inicio' });
+
+    btnEl.disabled = false; btnEl.textContent = 'Guardar nota';
+    if(error){
+      msg.style.color='#9c2f24'; msg.textContent = 'No se pudo guardar: ' + error.message;
+    } else {
+      msg.style.color='#1E7A46'; msg.textContent = '¡Guardada! Ya la puede ver en su Progreso.';
+      sb.functions.invoke('notificaciones-function', { body: { tipo: 'nota_nueva', atletaId } }).catch(()=>{});
+    }
+  }
+</script>
+</body>
+</html>

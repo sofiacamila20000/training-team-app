@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Run Club — Perfil Entrenador</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#12C0AE; --blue:#2E3AC0; --blue-deep:#1A1F6E; --ink:#0B1024;
+    --bg:#FFFFFF; --surface:#F2F6F8; --muted:#5C6470; --line:#E4E9ED;
+    --fuerza:#E8942C; --fuerza-dark:#B3651A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--surface); font-family:'Nunito',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:24px 16px; min-height:100vh;}
+  .app{width:100%; max-width:640px; background:var(--bg); border-radius:24px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(11,16,36,.2); align-self:flex-start; margin-top:4vh;}
+  .topbar{background:linear-gradient(135deg,var(--teal),var(--blue) 68%,var(--blue-deep)); color:#fff; padding:32px 32px 26px;}
+  .brand{font-family:'JetBrains Mono'; font-weight:700; font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.85);}
+  h1{font-family:'Baloo 2'; font-size:26px; font-weight:800; margin-top:8px;}
+  .sub{font-size:13.5px; color:rgba(255,255,255,.9); margin-top:4px;}
+
+  .content{padding:28px 32px 32px;}
+
+  #loginBox .field{margin-bottom:12px;}
+  input{font-family:'Nunito'; border:1.5px solid var(--line); border-radius:10px; padding:11px 13px; font-size:13.5px; width:100%;}
+  .btn{font-family:'Nunito'; font-weight:800; font-size:13.5px; padding:12px 20px; border-radius:40px; border:none; cursor:pointer; width:100%;}
+  .btn-primary{background:linear-gradient(120deg,var(--teal),var(--blue)); color:#fff;}
+  #loginError{color:#B3372E; font-size:12.5px; margin-top:10px; display:none;}
+
+  #mainApp{display:none;}
+  #mainApp.show{display:block;}
+  #loginBox.hide{display:none;}
+
+  .welcome{font-size:13.5px; color:var(--muted); margin-bottom:22px;}
+
+  .tool-card{
+    display:flex; align-items:center; gap:16px; padding:18px 20px; border:1px solid var(--line);
+    border-radius:16px; margin-bottom:12px; text-decoration:none; color:var(--ink); transition:border-color .15s;
+  }
+  .tool-card:hover{border-color:var(--teal);}
+  .tool-ic{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;}
+  .tool-ic.a{background:#EAEBFA;}
+  .tool-ic.b{background:#FCF0DE;}
+  .tool-title{font-weight:800; font-size:14.5px;}
+  .tool-desc{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .tool-arrow{margin-left:auto; color:#C6CBD4; font-size:16px;}
+
+  .logout-row{margin-top:24px; text-align:center;}
+  .logout-btn{color:#B3372E; font-weight:700; font-size:13px; cursor:pointer; background:none; border:none; font-family:'Nunito';}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">GRAVITY RUN CLUB</div>
+    <h1>Perfil Entrenador</h1>
+    <p class="sub">Un solo acceso para todo lo que necesitás administrar.</p>
+  </div>
+
+  <div class="content">
+    <div id="loginBox">
+      <div class="field"><input id="loginEmail" type="email" placeholder="Email"></div>
+      <div class="field"><input id="loginPass" type="password" placeholder="Contraseña"></div>
+      <button class="btn btn-primary" onclick="iniciarSesion()">Ingresar</button>
+      <div id="loginError"></div>
+    </div>
+
+    <div id="mainApp">
+      <p class="welcome">Elegí qué querés hacer:</p>
+
+      <a class="tool-card" href="cargar-planilla-conectado.html">
+        <div class="tool-ic a">📋</div>
+        <div>
+          <div class="tool-title">Cargar planilla semanal</div>
+          <div class="tool-desc">Subí el Excel de running o de Preparación Física</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </a>
+
+      <a class="tool-card" href="editor-perfil.html">
+        <div class="tool-ic b">👤</div>
+        <div>
+          <div class="tool-title">Editor de perfil</div>
+          <div class="tool-desc">Zonas, ritmos, marcas proyectadas, fuerza, y alta de atletas nuevos</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </a>
+
+      <a class="tool-card" href="seguimiento.html">
+        <div class="tool-ic a">✅</div>
+        <div>
+          <div class="tool-title">Seguimiento</div>
+          <div class="tool-desc">Lo que los atletas van completando y comentando de sus entrenos</div>
+        </div>
+        <span class="tool-arrow">→</span>
+      </a>
+
+      <div class="logout-row">
+        <button class="logout-btn" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function iniciarSesion(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'none';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){
+      errBox.textContent = 'No pudimos iniciar sesión: ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    mostrarApp();
+  }
+
+  function mostrarApp(){
+    document.getElementById('loginBox').classList.add('hide');
+    document.getElementById('mainApp').classList.add('show');
+  }
+
+  async function cerrarSesion(){
+    await sb.auth.signOut();
+    document.getElementById('mainApp').classList.remove('show');
+    document.getElementById('loginBox').classList.remove('hide');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+
+  sb.auth.getSession().then(({data}) => { if(data.session) mostrarApp(); });
+</script>
+</body>
+</html>

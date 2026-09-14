@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Run Club — Editor de Perfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#12C0AE; --blue:#2E3AC0; --blue-deep:#1A1F6E; --ink:#0B1024;
+    --bg:#FFFFFF; --surface:#F2F6F8; --muted:#5C6470; --line:#E4E9ED; --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--surface); font-family:'Nunito',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:24px 16px;}
+  .app{width:100%; max-width:900px; background:var(--bg); border-radius:24px; overflow:hidden; box-shadow:0 20px 50px -20px rgba(11,16,36,.2);}
+  .topbar{background:linear-gradient(135deg,var(--teal),var(--blue) 68%,var(--blue-deep)); color:#fff; padding:20px 28px;}
+  .brand{font-family:'JetBrains Mono'; font-weight:700; font-size:12px; letter-spacing:.1em; color:rgba(255,255,255,.85);}
+  .crumb{font-size:13px; color:rgba(255,255,255,.85); margin-top:2px;}
+  .back-btn{font-family:'Nunito'; font-weight:700; font-size:13px; color:#fff; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); padding:7px 13px; border-radius:20px; text-decoration:none; white-space:nowrap;}
+  .back-btn:hover{background:rgba(255,255,255,.3);}
+  .content{padding:28px;}
+  h1{font-family:'Baloo 2'; font-size:22px; font-weight:800; margin:0 0 4px;}
+  .subtitle{font-size:13.5px; color:var(--muted); margin-bottom:24px;}
+  .section-label{font-family:'JetBrains Mono'; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.04em; margin:22px 0 10px;}
+
+  input,select,textarea{font-family:'Nunito'; border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13.5px; width:100%;}
+  label{font-size:12px; color:var(--muted); font-weight:700; display:block; margin-bottom:5px;}
+  .field{margin-bottom:12px;}
+  .row{display:grid; gap:12px;}
+  .row.cols2{grid-template-columns:1fr 1fr;}
+  .row.cols3{grid-template-columns:1fr 1fr 1fr;}
+  .row.cols4{grid-template-columns:2fr 1fr 1fr auto;}
+
+  .btn{font-family:'Nunito'; font-weight:800; font-size:13.5px; padding:11px 20px; border-radius:40px; border:none; cursor:pointer;}
+  .btn-primary{background:linear-gradient(120deg,var(--teal),var(--blue)); color:#fff;}
+  .btn-ghost{background:var(--surface); color:var(--ink); border:1px solid var(--line);}
+  .btn-danger{background:#FBE9E9; color:#B3372E; padding:8px 12px; font-size:12px;}
+  .btn-add{background:var(--surface); color:var(--blue-deep); border:1px dashed var(--line); padding:9px 14px; font-size:12.5px; width:100%; margin-top:6px;}
+
+  .dyn-row{display:flex; gap:10px; align-items:end; margin-bottom:10px;}
+  .dyn-row > div{flex:1;}
+
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px;}
+
+  #loginBox, #mainApp{display:none;}
+  #loginBox.show, #mainApp.show{display:block;}
+  #loginBox .field{max-width:340px;}
+
+  .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:24px;}
+  #saveMsg{font-size:13px; margin-top:10px; text-align:right; display:none;}
+  #saveMsg.ok{color:#1E7A46;} #saveMsg.err{color:#B3372E;}
+
+  select#athleteSelect{max-width:360px;}
+
+  .zona-block{padding:14px 0; border-bottom:1px solid var(--line);}
+  .zona-block:last-child{border-bottom:none;}
+  .zona-block-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .zona-tag{font-family:'JetBrains Mono'; font-weight:700; font-size:13px; color:var(--brand,var(--ink)); background:var(--surface); padding:4px 10px; border-radius:8px; flex-shrink:0;}
+  .zona-block-head .zona-nombre{flex:1; font-weight:600;}
+  .zona-block-fields{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  @media (max-width:560px){ .zona-block-fields{grid-template-columns:1fr 1fr;} }
+  .zona-block-fields label{font-size:10.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar" style="display:flex; align-items:center; gap:12px;">
+    <a href="perfil-entrenador.html" class="back-btn">← Panel</a>
+    <div>
+      <div class="brand">GRAVITY RUN CLUB · PANEL DEL COACH</div>
+      <div class="crumb">Editor de atleta</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <div id="loginBox" class="show">
+      <h1>Ingresar</h1>
+      <p class="subtitle">Iniciá sesión para editar perfiles de atletas.</p>
+      <div class="field"><input id="loginEmail" type="email" placeholder="Email"></div>
+      <div class="field"><input id="loginPass" type="password" placeholder="Contraseña"></div>
+      <button class="btn btn-primary" onclick="iniciarSesion()">Ingresar</button>
+      <div id="loginError" style="color:#B3372E; font-size:12.5px; margin-top:10px; display:none;"></div>
+    </div>
+
+    <div id="mainApp">
+      <h1>Editor de perfil</h1>
+      <p class="subtitle">Zonas de frecuencia cardíaca, tabla de ritmos, marcas proyectadas, rutina de fuerza y datos personales. Esto se edita una vez por atleta, no cada semana.</p>
+
+      <div class="row cols2" style="max-width:520px;">
+        <div class="field">
+          <label>Filtrar por subgrupo</label>
+          <select id="subgrupoFilter" onchange="filtrarPorSubgrupo()">
+            <option value="">Todos los subgrupos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Atleta</label>
+          <select id="athleteSelect" onchange="cargarPerfil(this.value)">
+            <option value="">Seleccioná un atleta…</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="section-label">¿ES UN ATLETA NUEVO?</p>
+      <div class="card" id="nuevoAtletaCard">
+        <div class="row cols3" style="grid-template-columns:2fr 1.4fr 1.2fr;">
+          <div class="field"><label>Nombre completo</label><input id="nuevoNombre" placeholder="ej: Marcos Peralta"></div>
+          <div class="field"><label>Subgrupo</label><input id="nuevoSubgrupo" placeholder="ej: 10k-21k"></div>
+          <div class="field"><label>&nbsp;</label>
+            <label style="display:flex; align-items:center; gap:6px; font-weight:400; color:var(--ink); font-size:13px; padding-top:8px;">
+              <input type="checkbox" id="nuevoTieneRunning" checked style="width:auto;"> Tiene plan de running
+            </label>
+          </div>
+        </div>
+        <div class="field" style="max-width:280px;">
+          <label>Nivel de Preparación Física</label>
+          <select id="nuevoNivelFuerza">
+            <option value="ninguno">Ninguno</option>
+            <option value="mantenimiento">Mantenimiento (rutina chica)</option>
+            <option value="completo">Plan completo (circuito semanal)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="crearAtleta()">+ Crear atleta</button>
+        <div id="nuevoAtletaMsg" style="display:none; margin-top:14px; padding:14px; border-radius:10px; font-size:13px;"></div>
+      </div>
+
+      <div id="profileForm" style="display:none;">
+
+        <p class="section-label">TIPO DE PLAN</p>
+        <div class="card">
+          <div class="row cols3" style="grid-template-columns:1.4fr 1.6fr;">
+            <div class="field">
+              <label style="display:flex; align-items:center; gap:6px; font-weight:400; color:var(--ink); font-size:13px;">
+                <input type="checkbox" id="editTieneRunning" style="width:auto;"> Tiene plan de running
+              </label>
+            </div>
+            <div class="field">
+              <label>Nivel de Preparación Física</label>
+              <select id="editNivelFuerza">
+                <option value="ninguno">Ninguno</option>
+                <option value="mantenimiento">Mantenimiento (rutina chica)</option>
+                <option value="completo">Plan completo (circuito semanal)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <p class="section-label">DATOS PERSONALES</p>
+        <div class="card">
+          <div class="row cols4" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+            <div class="field"><label>Peso</label><input id="peso" placeholder="79kg"></div>
+            <div class="field"><label>Altura</label><input id="altura" placeholder="1.63m"></div>
+            <div class="field"><label>Fecha de nacimiento</label><input id="fechaNac" placeholder="18/3/1993"></div>
+            <div class="field"><label>Ingreso al club</label><input id="fechaIngreso" placeholder="4/1/2022"></div>
+          </div>
+        </div>
+
+        <p class="section-label">ZONAS DE FRECUENCIA CARDÍACA</p>
+        <div class="card" id="zonasCard">
+          <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Completá el "% máx" de cada zona (o dejá los de siempre) y el "Pulso máx" de la zona que llegue al 100% (normalmente Z5, con la FC máxima del atleta). El resto se calcula solo.</p>
+          <div id="zonasRows"></div>
+          <button class="btn btn-ghost" style="width:100%; margin-top:10px;" onclick="calcularPulsos()">⚡ Calcular pulsos desde el 100%</button>
+          <div id="calcularPulsosMsg" style="display:none; margin-top:8px; font-size:12.5px;"></div>
+        </div>
+
+        <p class="section-label">TABLA DE RITMOS</p>
+        <div class="card">
+          <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Completá el 100% con la marca de referencia del atleta. Agregá las filas de los demás porcentajes que necesites (no hace falta que sean siempre los mismos) y calculalos con un clic.</p>
+          <div id="ritmosRows"></div>
+          <button class="btn-add" onclick="agregarFila('ritmos')">+ Agregar fila</button>
+          <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="calcularRitmos()">⚡ Calcular ritmos desde el 100%</button>
+          <div id="calcularRitmosMsg" style="display:none; margin-top:8px; font-size:12.5px;"></div>
+        </div>
+
+        <p class="section-label">MARCAS PROYECTADAS</p>
+        <div class="card">
+          <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">Objetivos para distancias más allá de la marca actual del atleta.</p>
+          <div id="marcasRows"></div>
+          <button class="btn-add" onclick="agregarFila('marcas')">+ Agregar marca</button>
+        </div>
+
+        <p class="section-label">RUTINA DE FUERZA — MANTENIMIENTO</p>
+        <div class="card">
+          <div id="pfRows"></div>
+          <button class="btn-add" onclick="agregarFila('pf')">+ Agregar ejercicio</button>
+        </div>
+
+        <p class="section-label">DEVOLUCIÓN DE ESTA SEMANA</p>
+        <div class="card">
+          <p style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">Tu devolución personal de la semana — el atleta la ve en la pestaña "Progreso". Se guarda aparte, con su propio botón, no hace falta guardar todo el perfil para actualizarla.</p>
+          <textarea id="notaMensualTexto" rows="4" placeholder="Buena semana, bajá un cambio la intensidad del cambio de ritmo..." style="width:100%; border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; font-family:'Nunito'; font-size:13.5px; resize:vertical;"></textarea>
+          <button class="btn btn-primary" style="margin-top:10px;" onclick="guardarNotaMensual()">Guardar nota de la semana</button>
+          <div id="notaMensualMsg" style="display:none; margin-top:8px; font-size:12.5px;"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="cargarPerfil(document.getElementById('athleteSelect').value)">Descartar cambios</button>
+          <button class="btn btn-primary" onclick="guardarPerfil()">Guardar perfil</button>
+        </div>
+        <div id="saveMsg"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const FUNCION_NOTIFICACIONES = 'notificaciones-function';
+
+  let atletaActualId = null;
+
+  function lunesDeEstaSemana(){
+    const d = new Date();
+    const diaSemana = d.getDay(); // 0=Domingo, 1=Lunes...
+    const offset = diaSemana === 0 ? -6 : 1 - diaSemana;
+    d.setDate(d.getDate() + offset);
+    return d.toISOString().slice(0,10);
+  }
+  let RITMOS_ANTES_DE_EDITAR = {};
+
+  async function iniciarSesion(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'none';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){ errBox.textContent = 'No pudimos iniciar sesión: ' + error.message; errBox.style.display='block'; return; }
+    mostrarApp();
+  }
+  function mostrarApp(){
+    document.getElementById('loginBox').classList.remove('show');
+    document.getElementById('mainApp').classList.add('show');
+    cargarListaAtletas();
+  }
+  sb.auth.getSession().then(({data}) => { if(data.session) mostrarApp(); });
+
+  let TODOS_LOS_ATLETAS = [];
+
+  async function cargarListaAtletas(){
+    const { data } = await sb.from('atletas').select('id,nombre,slug,subgrupo').eq('activo', true).order('subgrupo').order('nombre');
+    TODOS_LOS_ATLETAS = data || [];
+
+    // Orden fijo por distancia, en vez de alfabético
+    const ORDEN_SUBGRUPOS = ['3k-5k', '5k-10k', '10k-21k', '21k-30k', '42k', 'Preparación Física', 'Juvenil'];
+    const subgruposDetectados = [...new Set(TODOS_LOS_ATLETAS.map(a => a.subgrupo))];
+    const subgrupos = subgruposDetectados.sort((a, b) => {
+      const ia = ORDEN_SUBGRUPOS.indexOf(a), ib = ORDEN_SUBGRUPOS.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b); // desconocidos, al final, alfabético entre ellos
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    const filtroSel = document.getElementById('subgrupoFilter');
+    filtroSel.innerHTML = '<option value="">Todos los subgrupos</option>' +
+      subgrupos.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    renderAthleteSelect(TODOS_LOS_ATLETAS);
+  }
+
+  function renderAthleteSelect(lista){
+    const sel = document.getElementById('athleteSelect');
+    sel.innerHTML = '<option value="">Seleccioná un atleta…</option>' +
+      lista.map(a => `<option value="${a.id}">${a.nombre} — ${a.subgrupo} (${a.slug})</option>`).join('');
+  }
+
+  function filtrarPorSubgrupo(){
+    const subgrupo = document.getElementById('subgrupoFilter').value;
+    const filtrada = subgrupo ? TODOS_LOS_ATLETAS.filter(a => a.subgrupo === subgrupo) : TODOS_LOS_ATLETAS;
+    renderAthleteSelect(filtrada);
+    document.getElementById('profileForm').style.display = 'none'; // el atleta seleccionado ya no está a la vista
+  }
+
+  function normalizarSlug(nombre){
+    return nombre.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // saca tildes
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim().replace(/\s+/g, '-');
+  }
+
+  async function generarSlugUnico(base){
+    let slug = base, n = 2;
+    while(true){
+      const { data } = await sb.from('atletas').select('id').eq('slug', slug).maybeSingle();
+      if(!data) return slug;
+      slug = `${base}-${n}`; n++;
+    }
+  }
+
+  async function generarPinUnico(){
+    while(true){
+      const pin = String(Math.floor(1000 + Math.random()*9000));
+      const { data } = await sb.from('atletas').select('id').eq('pin', pin).maybeSingle();
+      if(!data) return pin;
+    }
+  }
+
+  async function crearAtleta(){
+    const nombre = document.getElementById('nuevoNombre').value.trim();
+    const subgrupo = document.getElementById('nuevoSubgrupo').value.trim();
+    const tieneRunning = document.getElementById('nuevoTieneRunning').checked;
+    const nivelFuerza = document.getElementById('nuevoNivelFuerza').value;
+    const msg = document.getElementById('nuevoAtletaMsg');
+
+    if(!nombre || !subgrupo){
+      msg.style.display = 'block';
+      msg.style.background = '#FBE9E9'; msg.style.color = '#B3372E';
+      msg.textContent = 'Completá el nombre y el subgrupo antes de crear.';
+      return;
+    }
+
+    const slugBase = normalizarSlug(nombre);
+    const slug = await generarSlugUnico(slugBase);
+    const pin = await generarPinUnico();
+
+    const { error } = await sb.from('atletas').insert({
+      nombre, subgrupo, slug, pin, disciplina: subgrupo, tiene_running: tieneRunning, nivel_fuerza: nivelFuerza
+    });
+
+    if(error){
+      msg.style.display = 'block';
+      msg.style.background = '#FBE9E9'; msg.style.color = '#B3372E';
+      msg.textContent = 'No se pudo crear: ' + error.message;
+      return;
+    }
+
+    const linkPortal = `${window.location.origin}/portal-atleta-conectado.html?a=${slug}`;
+    const mensajeWsp = `¡Hola ${nombre.split(' ')[0]}! Este es tu acceso al portal de Gravity Run Club, donde vas a ver tu plan de entrenamiento cada semana:\n\n${linkPortal}\n\nTu PIN de acceso es: ${pin}\n\nUna vez que entres, te va a ofrecer instalarlo como app en tu celular para que lo tengas siempre a mano 💪`;
+
+    msg.style.display = 'block';
+    msg.style.background = '#E7F2E6'; msg.style.color = '#1E7A46';
+    msg.innerHTML = `<b>¡Atleta creado!</b><br>Usuario: <b>${slug}</b> · PIN: <b>${pin}</b><br><br>
+      <textarea readonly style="width:100%; height:110px; font-family:'Nunito'; font-size:12.5px; border:1px solid #a9cfa4; border-radius:8px; padding:8px; margin-top:6px;">${mensajeWsp}</textarea>
+      <button class="btn btn-ghost" style="margin-top:8px;" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.textContent='Copiado ✓'">Copiar mensaje para WhatsApp</button>`;
+
+    document.getElementById('nuevoNombre').value = '';
+    document.getElementById('nuevoSubgrupo').value = '';
+    cargarListaAtletas();
+  }
+
+  const ZONAS_FIJAS = [
+    {zona:'Z5', nombre:'Anaeróbico láctico'},
+    {zona:'Z4', nombre:'Umbral anaeróbico'},
+    {zona:'Z3', nombre:'Umbral aeróbico'},
+    {zona:'Z2', nombre:'Aeróbica media'},
+    {zona:'Z1', nombre:'Aeróbica base'},
+  ];
+
+  function formatFechaAR(iso){
+    if(!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${parseInt(d)}/${parseInt(m)}/${y}`;
+  }
+
+  async function cargarPerfil(atletaId){
+    if(!atletaId){ document.getElementById('profileForm').style.display='none'; return; }
+    atletaActualId = atletaId;
+    document.getElementById('profileForm').style.display = 'block';
+    document.getElementById('saveMsg').style.display = 'none';
+
+    const semanaActualISO = lunesDeEstaSemana();
+
+    const [{data:atleta},{data:zonas},{data:ritmos},{data:marcas},{data:pf},{data:notaMes}] = await Promise.all([
+      sb.from('atletas').select('*').eq('id', atletaId).single(),
+      sb.from('perfil_zonas_fc').select('*').eq('atleta_id', atletaId),
+      sb.from('perfil_ritmos').select('*').eq('atleta_id', atletaId).order('orden'),
+      sb.from('marcas_proyectadas').select('*').eq('atleta_id', atletaId).order('orden'),
+      sb.from('rutina_pf').select('*').eq('atleta_id', atletaId).order('orden'),
+      sb.from('observaciones_mensuales').select('*').eq('atleta_id', atletaId).eq('semana_inicio', semanaActualISO).maybeSingle(),
+    ]);
+
+    document.getElementById('notaMensualTexto').value = notaMes?.texto || '';
+    document.getElementById('notaMensualMsg').style.display = 'none';
+
+    // Guardamos una "foto" de los ritmos tal como estaban al abrir este
+    // perfil — al guardar, comparamos contra esto para detectar mejoras
+    // de marca y registrarlas solas, sin que el entrenador haga nada extra.
+    RITMOS_ANTES_DE_EDITAR = {};
+    (ritmos||[]).forEach(r => { if(r.distancia) RITMOS_ANTES_DE_EDITAR[r.distancia.trim().toLowerCase()] = r.ritmo; });
+
+    document.getElementById('peso').value = atleta?.peso_kg ? atleta.peso_kg+'kg' : (atleta?.peso_kg_texto||'');
+    document.getElementById('altura').value = atleta?.altura_m ? atleta.altura_m+'m' : '';
+    document.getElementById('fechaNac').value = formatFechaAR(atleta?.fecha_nacimiento);
+    document.getElementById('fechaIngreso').value = formatFechaAR(atleta?.fecha_ingreso);
+    document.getElementById('editTieneRunning').checked = atleta?.tiene_running !== false;
+    document.getElementById('editNivelFuerza').value = atleta?.nivel_fuerza || 'ninguno';
+
+    // ZONAS -- siempre las 5, precargadas con lo que haya
+    const zonasRows = document.getElementById('zonasRows');
+    zonasRows.innerHTML = ZONAS_FIJAS.map(zf => {
+      const existente = (zonas||[]).find(z => z.zona === zf.zona);
+      return `<div class="zona-block" data-zona="${zf.zona}">
+        <div class="zona-block-head">
+          <span class="zona-tag">${zf.zona}</span>
+          <input class="zona-nombre" value="${existente?.nombre_zona || zf.nombre}">
+        </div>
+        <div class="zona-block-fields">
+          <div class="field"><label>% máx</label><input class="zona-pct-max" type="number" step="0.1" placeholder="—" value="${existente?.porcentaje_max ?? ''}"></div>
+          <div class="field"><label>% mín</label><input class="zona-pct-min" type="number" step="0.1" placeholder="—" value="${existente?.porcentaje_min ?? ''}"></div>
+          <div class="field"><label>Pulso máx</label><input class="zona-pulso-max" type="number" step="0.1" placeholder="—" value="${existente?.pulso_max ?? ''}"></div>
+          <div class="field"><label>Pulso mín</label><input class="zona-pulso-min" type="number" step="0.1" placeholder="—" value="${existente?.pulso_min ?? ''}"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    renderDinamico('ritmosRows', (ritmos||[]).map(r=>({a:r.porcentaje, b:r.ritmo, c:r.distancia})), ['%','Ritmo','Distancia']);
+    renderDinamico('marcasRows', (marcas||[]).map(m=>({a:m.distancia, b:m.tiempo, c:m.notas})), ['Distancia','Tiempo','Notas']);
+    renderDinamico('pfRows', (pf||[]).map(p=>({a:p.ejercicio, b:p.series, c:p.repeticiones})), ['Ejercicio','Series','Repeticiones']);
+  }
+
+  function renderDinamico(containerId, filas, labels){
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    if(filas.length === 0) filas = [{a:'',b:'',c:''}];
+    filas.forEach(f => agregarFilaDOM(containerId, labels, f.a, f.b, f.c));
+  }
+
+  function agregarFila(tipo){
+    const map = { ritmos:['ritmosRows',['%','Ritmo','Distancia']], marcas:['marcasRows',['Distancia','Tiempo','Notas']], pf:['pfRows',['Ejercicio','Series','Repeticiones']] };
+    const [containerId, labels] = map[tipo];
+    agregarFilaDOM(containerId, labels, '', '', '');
+  }
+
+  function agregarFilaDOM(containerId, labels, a, b, c){
+    const el = document.getElementById(containerId);
+    const row = document.createElement('div');
+    row.className = 'dyn-row';
+    row.innerHTML = `
+      <div><input class="f-a" placeholder="${labels[0]}" value="${a??''}"></div>
+      <div><input class="f-b" placeholder="${labels[1]}" value="${b??''}"></div>
+      <div><input class="f-c" placeholder="${labels[2]}" value="${c??''}"></div>
+      <button class="btn-danger" onclick="this.parentElement.remove()">✕</button>`;
+    el.appendChild(row);
+  }
+
+  function leerFilas(containerId){
+    return Array.from(document.getElementById(containerId).querySelectorAll('.dyn-row')).map((row,i) => ({
+      a: row.querySelector('.f-a').value.trim(),
+      b: row.querySelector('.f-b').value.trim(),
+      c: row.querySelector('.f-c').value.trim(),
+      orden: i
+    })).filter(r => r.a);
+  }
+
+  function parsePaceToSeconds(txt){
+    const m = String(txt).trim().match(/^(\d{1,2}):(\d{2})$/);
+    if(!m) return null;
+    return parseInt(m[1]) * 60 + parseInt(m[2]);
+  }
+
+  function formatSecondsToPace(totalSeg){
+    const min = Math.floor(totalSeg / 60);
+    const seg = Math.round(totalSeg % 60);
+    return `${min}:${String(seg).padStart(2,'0')}`;
+  }
+
+  function calcularRitmos(){
+    const msg = document.getElementById('calcularRitmosMsg');
+    const filas = Array.from(document.getElementById('ritmosRows').querySelectorAll('.dyn-row'));
+
+    const fila100 = filas.find(row => parseFloat(row.querySelector('.f-a').value) === 100);
+    if(!fila100){
+      msg.style.display = 'block'; msg.style.color = '#B3372E';
+      msg.textContent = 'Falta la fila del 100% — agregala primero, con el ritmo de referencia del atleta.';
+      return;
+    }
+    const seg100 = parsePaceToSeconds(fila100.querySelector('.f-b').value);
+    if(seg100 === null){
+      msg.style.display = 'block'; msg.style.color = '#B3372E';
+      msg.textContent = 'El ritmo del 100% tiene que estar en formato M:SS (ej: 4:15).';
+      return;
+    }
+
+    let calculadas = 0;
+    filas.forEach(row => {
+      const pct = parseFloat(row.querySelector('.f-a').value);
+      if(!pct || pct === 100) return; // el 100% no se toca, es la referencia
+      const segNuevo = seg100 * (2 - pct / 100);
+      row.querySelector('.f-b').value = formatSecondsToPace(segNuevo);
+      calculadas++;
+    });
+
+    msg.style.display = 'block'; msg.style.color = '#1E7A46';
+    msg.textContent = `Listo — se calcularon ${calculadas} ritmo${calculadas===1?'':'s'} a partir del 100% (${fila100.querySelector('.f-b').value}).`;
+
+    reordenarRitmos();
+  }
+
+  function reordenarRitmos(){
+    const filas = leerFilas('ritmosRows')
+      .map(r => ({ a: r.a, b: r.b, c: r.c }))
+      .sort((x, y) => parseFloat(y.a) - parseFloat(x.a)); // mayor a menor
+    renderDinamico('ritmosRows', filas.map(f => ({ a: f.a, b: f.b, c: f.c })), ['%','Ritmo','Distancia']);
+  }
+
+  function calcularPulsos(){
+    const msg = document.getElementById('calcularPulsosMsg');
+    const filas = Array.from(document.getElementById('zonasRows').querySelectorAll('.zona-block'));
+
+    const fila100 = filas.find(row => parseFloat(row.querySelector('.zona-pct-max').value) === 100);
+    if(!fila100){
+      msg.style.display = 'block'; msg.style.color = '#B3372E';
+      msg.textContent = 'Ninguna zona tiene "% máx" = 100 — poné 100 en la zona que corresponda a la FC máxima (normalmente Z5) antes de calcular.';
+      return;
+    }
+    const maxHR = parseFloat(fila100.querySelector('.zona-pulso-max').value);
+    if(!maxHR || maxHR <= 0){
+      msg.style.display = 'block'; msg.style.color = '#B3372E';
+      msg.textContent = 'Falta el "Pulso máx" de la zona al 100% — es la frecuencia cardíaca máxima del atleta.';
+      return;
+    }
+
+    let calculadas = 0;
+    filas.forEach(row => {
+      const pctMax = parseFloat(row.querySelector('.zona-pct-max').value);
+      const pctMin = parseFloat(row.querySelector('.zona-pct-min').value);
+      if(pctMax && pctMax !== 100){
+        row.querySelector('.zona-pulso-max').value = (maxHR * pctMax / 100).toFixed(1);
+        calculadas++;
+      }
+      if(pctMin){
+        row.querySelector('.zona-pulso-min').value = (maxHR * pctMin / 100).toFixed(1);
+      }
+    });
+
+    msg.style.display = 'block'; msg.style.color = '#1E7A46';
+    msg.textContent = `Listo — se calcularon los pulsos de ${calculadas} zona${calculadas===1?'':'s'} a partir de una FC máxima de ${maxHR}.`;
+  }
+
+  function parseFechaAR(txt){
+    txt = (txt||'').trim();
+    const m = txt.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if(!m) return null;
+    let [,d,mo,y] = m;
+    if(y.length===2) y = '20'+y;
+    return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+
+  async function guardarNotaMensual(){
+    if(!atletaActualId) return;
+    const texto = document.getElementById('notaMensualTexto').value.trim();
+    const msg = document.getElementById('notaMensualMsg');
+    if(!texto){
+      msg.style.display='block'; msg.style.color='#B3372E'; msg.textContent = 'Escribí algo antes de guardar.';
+      return;
+    }
+    const semanaActualISO = lunesDeEstaSemana();
+
+    const { error } = await sb.from('observaciones_mensuales').upsert({
+      atleta_id: atletaActualId, semana_inicio: semanaActualISO, texto,
+    }, { onConflict: 'atleta_id,semana_inicio' });
+
+    msg.style.display = 'block';
+    if(error){
+      msg.style.color='#B3372E'; msg.textContent = 'No se pudo guardar: ' + error.message;
+    } else {
+      msg.style.color='#0B8F82'; msg.textContent = 'Nota guardada — ya la puede ver en su Progreso.';
+      sb.functions.invoke(FUNCION_NOTIFICACIONES, { body: { tipo: 'nota_nueva', atletaId: atletaActualId } }).catch(()=>{});
+    }
+  }
+
+  async function guardarPerfil(){
+    if(!atletaActualId) return;
+    const msg = document.getElementById('saveMsg');
+    msg.style.display = 'none';
+
+    try {
+      // Datos personales
+      const pesoNum = parseFloat((document.getElementById('peso').value.match(/[\d.]+/)||[])[0]) || null;
+      const alturaNum = parseFloat((document.getElementById('altura').value.match(/[\d.]+/)||[])[0]) || null;
+      const { error: errDatos } = await sb.from('atletas').update({
+        peso_kg: pesoNum,
+        altura_m: alturaNum,
+        fecha_nacimiento: parseFechaAR(document.getElementById('fechaNac').value),
+        fecha_ingreso: parseFechaAR(document.getElementById('fechaIngreso').value),
+        tiene_running: document.getElementById('editTieneRunning').checked,
+        nivel_fuerza: document.getElementById('editNivelFuerza').value,
+      }).eq('id', atletaActualId);
+      if(errDatos) throw new Error('Datos personales: ' + errDatos.message);
+
+      // Zonas FC (upsert por atleta+zona)
+      const zonasFilas = Array.from(document.querySelectorAll('#zonasRows .zona-block')).map(row => ({
+        atleta_id: atletaActualId,
+        zona: row.dataset.zona,
+        nombre_zona: row.querySelector('.zona-nombre').value.trim(),
+        porcentaje_max: parseFloat(row.querySelector('.zona-pct-max').value) || null,
+        porcentaje_min: parseFloat(row.querySelector('.zona-pct-min').value) || null,
+        pulso_max: parseFloat(row.querySelector('.zona-pulso-max').value) || 0,
+        pulso_min: parseFloat(row.querySelector('.zona-pulso-min').value) || null,
+      })).filter(z => z.pulso_max > 0 || z.porcentaje_max > 0);
+      if(zonasFilas.length){
+        const { error: errZonas } = await sb.from('perfil_zonas_fc').upsert(zonasFilas, { onConflict: 'atleta_id,zona' });
+        if(errZonas) throw new Error('Zonas de FC: ' + errZonas.message);
+      }
+
+      // Ritmos, marcas, PF -> borrar y recrear (más simple y confiable que hacer diffs)
+      const { error: errDelRitmos } = await sb.from('perfil_ritmos').delete().eq('atleta_id', atletaActualId);
+      if(errDelRitmos) throw new Error('Ritmos (borrado previo): ' + errDelRitmos.message);
+      const ritmos = leerFilas('ritmosRows').map(r => ({ atleta_id: atletaActualId, porcentaje: parseFloat(r.a)||0, ritmo: r.b, distancia: r.c, orden: r.orden }));
+      if(ritmos.length){
+        const { error: errRitmos } = await sb.from('perfil_ritmos').insert(ritmos);
+        if(errRitmos) throw new Error('Tabla de ritmos: ' + errRitmos.message);
+      }
+
+      // Detecta mejoras de marca comparando contra los ritmos de antes de
+      // abrir este perfil, y las registra solas en el historial — el
+      // entrenador no tiene que hacer nada aparte de actualizar el ritmo.
+      const cambiosDeMarca = ritmos
+        .filter(r => r.distancia)
+        .map(r => {
+          const key = r.distancia.trim().toLowerCase();
+          const anterior = RITMOS_ANTES_DE_EDITAR[key];
+          return (anterior && anterior !== r.ritmo) ? { distancia: r.distancia, anterior, nuevo: r.ritmo } : null;
+        })
+        .filter(Boolean);
+      if(cambiosDeMarca.length){
+        const filasMarcas = cambiosDeMarca.map(c => ({
+          atleta_id: atletaActualId, distancia: c.distancia,
+          tiempo_anterior: c.anterior, tiempo_nuevo: c.nuevo,
+        }));
+        const { error: errMarcasHist } = await sb.from('marcas_historial').insert(filasMarcas);
+        if(errMarcasHist) throw new Error('Historial de marcas: ' + errMarcasHist.message);
+      }
+
+      const { error: errDelMarcas } = await sb.from('marcas_proyectadas').delete().eq('atleta_id', atletaActualId);
+      if(errDelMarcas) throw new Error('Marcas (borrado previo): ' + errDelMarcas.message);
+      const marcas = leerFilas('marcasRows').map(r => ({ atleta_id: atletaActualId, distancia: r.a, tiempo: r.b, notas: r.c, orden: r.orden }));
+      if(marcas.length){
+        const { error: errMarcas } = await sb.from('marcas_proyectadas').insert(marcas);
+        if(errMarcas) throw new Error('Marcas proyectadas: ' + errMarcas.message);
+      }
+
+      const { error: errDelPf } = await sb.from('rutina_pf').delete().eq('atleta_id', atletaActualId);
+      if(errDelPf) throw new Error('Rutina de fuerza (borrado previo): ' + errDelPf.message);
+      const pf = leerFilas('pfRows').map(r => ({ atleta_id: atletaActualId, ejercicio: r.a, series: parseInt(r.b)||null, repeticiones: r.c, orden: r.orden }));
+      if(pf.length){
+        const { error: errPf } = await sb.from('rutina_pf').insert(pf);
+        if(errPf) throw new Error('Rutina de fuerza: ' + errPf.message);
+      }
+
+      msg.textContent = cambiosDeMarca.length
+        ? `Perfil guardado. Se registraron ${cambiosDeMarca.length} mejora${cambiosDeMarca.length===1?'':'s'} de marca (${cambiosDeMarca.map(c=>c.distancia).join(', ')}).`
+        : 'Perfil guardado correctamente.';
+      msg.className = 'ok'; msg.style.display = 'block';
+    } catch(e) {
+      console.error('Error guardando perfil:', e);
+      msg.textContent = 'Hubo un error al guardar: ' + e.message;
+      msg.className = 'err'; msg.style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>

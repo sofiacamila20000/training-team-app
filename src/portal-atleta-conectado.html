@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gravity Run Club — Portal del Atleta</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/icon-apple-touch.png">
+<meta name="theme-color" content="#12C0AE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gravity">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#12C0AE;
+    --teal-dark:#0B8F82;
+    --blue:#2E3AC0;
+    --blue-deep:#1A1F6E;
+    --ink:#0B1024;
+    --bg:#FFFFFF;
+    --surface:#F2F6F8;
+    --muted:#5C6470;
+    --line:#E4E9ED;
+    --radius:18px;
+    --z1:#8B93A8; --z1-bg:#EEF0F4;
+    --z2:#12C0AE; --z2-bg:#E3F8F6;
+    --z3:#2E3AC0; --z3-bg:#EAEBFA;
+    --z4:#E8942C; --z4-bg:#FCF0DE;
+    --z5:#D64545; --z5-bg:#FBE9E9;
+    --fuerza:#4C2E8F; --fuerza-dark:#2E1A5C; --fuerza-deep:#1A0F38;
+    --calor:#12C0AE; --calor-bg:#E3F8F6;
+    --core:#4C2E8F; --core-bg:#EEE8FA;
+    --afloje:#2E3AC0; --afloje-bg:#EAEBFA;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--surface); color:var(--ink); font-family:'Nunito',sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Baloo 2',sans-serif; font-weight:700;}
+
+  .app{max-width:760px; margin:0 auto; min-height:100vh; background:var(--bg); box-shadow:0 0 60px rgba(11,16,36,.06);}
+  @media (min-width:800px){ .app{margin:24px auto; border-radius:24px; min-height:auto; overflow:hidden;} body{padding:0 16px;} }
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg, var(--teal) 0%, var(--blue) 68%, var(--blue-deep) 100%); color:#fff; padding:26px 24px 22px; position:relative; overflow:hidden;}
+  .header-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; position:relative; z-index:1;}
+  .brand-label{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12.5px; letter-spacing:0.1em; color:#fff;}
+  .avatar{width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-family:'Baloo 2'; font-size:13px; font-weight:700; color:#fff; cursor:pointer;}
+  .athlete-name{font-size:clamp(24px,4vw,30px); line-height:1.1; margin:0 0 6px; position:relative; z-index:1;}
+  .week-range{font-size:14px; color:rgba(255,255,255,.95); position:relative; z-index:1;}
+  .week-tag{display:inline-block; margin-top:12px; background:rgba(255,255,255,.22); padding:5px 12px; border-radius:20px; font-size:12px; font-family:'JetBrains Mono'; letter-spacing:.03em; position:relative; z-index:1; color:#fff; font-weight:500;}
+
+  .volume-strip{display:flex; background:var(--blue-deep); padding:16px 24px; gap:28px; position:relative; z-index:1;}
+  .volume-item .num{font-family:'Baloo 2'; font-size:19px; font-weight:700; color:#fff;}
+  .volume-item .label{font-size:11.5px; color:rgba(255,255,255,.92); margin-top:1px; font-family:'JetBrains Mono'; font-weight:500;}
+
+  /* TABS */
+  .tabbar{display:flex; gap:4px; padding:10px 16px; background:var(--bg); border-bottom:1px solid var(--line); overflow-x:auto; position:sticky; top:0; z-index:5;}
+  .tab-btn{
+    font-family:'Nunito'; font-weight:700; font-size:13.5px; color:var(--muted);
+    background:transparent; border:none; padding:9px 14px; border-radius:10px; cursor:pointer; white-space:nowrap;
+  }
+  .tab-btn.active{background:var(--surface); color:var(--blue-deep);}
+
+  .content{padding:20px 20px 48px;}
+  @media (min-width:640px){ .content{padding:28px 32px 56px;} }
+  .section-label{font-family:'JetBrains Mono'; font-size:11.5px; color:var(--muted); font-weight:700; letter-spacing:.03em; margin:4px 2px 12px;}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+
+  /* DAY CARDS */
+  .day-grid{display:grid; grid-template-columns:1fr; gap:10px;}
+  @media (min-width:640px){ .day-grid{grid-template-columns:1fr 1fr;} }
+  .day-card{background:var(--bg); border:1px solid var(--line); border-radius:14px; overflow:hidden; align-self:start;}
+  .day-card.today{border:1.5px solid var(--teal); box-shadow:0 4px 18px -8px rgba(18,192,174,.4);}
+  .day-head{display:flex; align-items:center; gap:12px; padding:14px 15px; cursor:pointer;}
+  .day-dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .day-dot.rest{background:var(--line);}
+  .day-info{flex:1; min-width:0;}
+  .day-name-row{display:flex; align-items:baseline; gap:8px;}
+  .day-name{font-weight:800; font-size:14.5px; color:var(--ink);}
+  .today-pill{font-size:10px; font-weight:700; color:#fff; background:var(--teal); padding:2px 8px; border-radius:10px; font-family:'JetBrains Mono';}
+  .day-type{font-size:12.5px; color:var(--muted); margin-top:2px;}
+  .zone-badge{font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; font-family:'JetBrains Mono';}
+  .chevron{color:#C6CBD4; font-size:13px; transition:transform .15s ease;}
+  .day-card.open .chevron{transform:rotate(180deg);}
+  .day-detail{display:none; padding:0 15px 16px 38px;}
+  .day-card.open .day-detail{display:block;}
+  .day-workout{font-size:14px; line-height:1.55; color:var(--ink); margin:0 0 10px;}
+  .day-meta{display:flex; gap:16px; font-size:11.5px; color:var(--muted); font-family:'JetBrains Mono';}
+  .day-meta b{color:var(--ink); font-weight:700;}
+
+  .feedback-btn{margin-top:10px; background:var(--surface); border:1px solid var(--line); color:var(--blue-deep); font-family:'Nunito'; font-weight:700; font-size:12.5px; padding:8px 14px; border-radius:20px; cursor:pointer;}
+  .feedback-edit-btn{background:transparent; border:none; color:var(--blue); font-size:11.5px; font-weight:700; cursor:pointer; margin-top:4px; padding:0;}
+  .feedback-done{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);}
+  .feedback-form{margin-top:10px; padding:12px; background:var(--surface); border-radius:10px;}
+  .fb-label{font-family:'JetBrains Mono'; font-size:10px; font-weight:700; color:var(--muted); display:block;}
+  .fb-hint{font-size:10px; color:#8B93A8; margin:2px 0 6px;}
+  .fb-input{width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; font-family:'Nunito'; margin-top:4px; box-sizing:border-box;}
+  .fb-ritmo-bar{display:flex; border-radius:10px; overflow:hidden; border:1px solid var(--line); margin-top:4px;}
+  .fb-ritmo-btn{flex:1; padding:9px 4px; background:#fff; border:none; border-right:1px solid var(--line); font-size:11px; font-weight:700; font-family:'Nunito'; cursor:pointer; color:var(--muted);}
+  .fb-ritmo-btn:last-child{border-right:none;}
+  .fb-ritmo-btn.active[data-val="debajo"]{background:var(--z4); color:#fff;}
+  .fb-ritmo-btn.active[data-val="en_rango"]{background:var(--calor); color:#fff;}
+  .fb-ritmo-btn.active[data-val="encima"]{background:var(--core); color:#fff;}
+  .fb-save-btn{width:100%; margin-top:10px; background:linear-gradient(120deg,var(--teal),var(--blue)); color:#fff; border:none; padding:9px; border-radius:20px; font-size:12.5px; font-weight:800; cursor:pointer;}
+  .fb-msg{font-size:11.5px; margin-top:6px; text-align:center;}
+  .rest-detail{font-size:13.5px; color:var(--muted); padding:0 15px 15px 38px;}
+
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px;}
+
+  .week-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .week-nav button{font-family:'Nunito'; font-weight:700; font-size:12.5px; color:var(--blue-deep); background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:7px 14px; cursor:pointer;}
+  .week-nav button:disabled{opacity:.35; cursor:default;}
+  .week-nav span{font-size:12px; color:var(--muted); font-weight:600;}
+
+  .pdf-btn{display:block; width:100%; margin-top:18px; background:var(--surface); border:1px solid var(--line); color:var(--blue-deep); font-family:'Nunito'; font-weight:700; font-size:13px; padding:12px; border-radius:12px; cursor:pointer;}
+  .pdf-btn:hover{background:#EAEBFA;}
+
+  .prog-toggle{display:flex; background:var(--surface); border-radius:10px; padding:3px; margin-bottom:16px;}
+  .prog-toggle-btn{flex:1; text-align:center; padding:8px; background:transparent; border:none; border-radius:8px; font-size:12.5px; font-weight:700; color:var(--muted); font-family:'Nunito'; cursor:pointer;}
+  .prog-toggle-btn.active{background:#fff; color:var(--blue-deep);}
+  .prog-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px;}
+  .prog-stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+  .prog-stat{background:var(--surface); border-radius:12px; padding:12px;}
+  .prog-stat .num{font-family:'Baloo 2'; font-size:20px; font-weight:800; color:var(--ink);}
+  .prog-stat .lbl{font-size:10.5px; color:var(--muted);}
+  .prog-note{background:linear-gradient(135deg,var(--teal),var(--blue) 68%,var(--blue-deep)); border-radius:14px; padding:16px 18px; margin-bottom:12px; color:#fff;}
+  .prog-empty{font-size:12.5px; color:var(--muted); text-align:center; padding:20px 0;}
+
+  .zone-row{display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid var(--line);}
+  .zone-row:last-child{border-bottom:none;}
+  .zone-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .zone-name{font-size:13px; font-weight:600; color:var(--ink);}
+  .zone-col{text-align:right; min-width:78px;}
+  .zone-col .val{font-size:13px; color:var(--ink); font-family:'JetBrains Mono'; font-weight:600; white-space:nowrap;}
+  .zone-col .lbl{font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  @media (max-width:380px){ .zone-col{min-width:64px;} .zone-col .val{font-size:12px;} }
+
+  table.data-table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.data-table th{text-align:left; font-size:10.5px; color:var(--muted); font-weight:700; padding:6px 4px; border-bottom:1px solid var(--line); font-family:'JetBrains Mono'; text-transform:uppercase; letter-spacing:.03em;}
+  table.data-table td{padding:8px 4px; border-bottom:1px solid var(--line); color:var(--ink);}
+  table.data-table tr:last-child td{border-bottom:none;}
+  .pct-cell{font-weight:700; font-family:'JetBrains Mono'; color:var(--blue-deep);}
+  .empty-note{font-size:13px; color:var(--muted); padding:6px 2px;}
+
+  .pf-item{display:flex; justify-content:space-between; align-items:center; padding:9px 0; font-size:13.5px;}
+  .pf-item:not(:last-child){border-bottom:1px solid rgba(11,16,36,.06);}
+  .pf-subsection{border-radius:12px; padding:12px 14px; margin-bottom:10px;}
+  .pf-subsection:last-child{margin-bottom:0;}
+  .pf-subtitle{display:flex; align-items:center; gap:6px; font-family:'Baloo 2'; font-size:12.5px; font-weight:700; margin-bottom:6px;}
+  .pf-subtitle .ic{font-size:14px; display:inline-flex; align-items:center;}
+  .pf-item:last-child{border-bottom:none;}
+  .pf-scheme{color:var(--muted); font-size:12.5px; font-family:'JetBrains Mono';}
+
+  .profile-header{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  .profile-avatar{width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--teal),var(--blue)); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Baloo 2'; font-weight:700; font-size:18px;}
+  .logout-btn{text-align:center; cursor:pointer; color:#B3372E; font-weight:700; font-size:13.5px; padding:14px;}
+  .install-btn{text-align:center; cursor:pointer; color:var(--blue-deep); font-weight:700; font-size:13.5px; padding:14px;}
+
+  /* PANTALLAS DE ACCESO */
+  #pinScreen,#notfound{padding:70px 24px; text-align:center;}
+  #pinScreen .logo-txt{font-family:'JetBrains Mono'; font-weight:700; color:var(--blue-deep); font-size:14px; letter-spacing:.08em; margin-bottom:32px;}
+  #pinScreen .prompt{font-size:14.5px; color:var(--ink); margin-bottom:18px; font-weight:600;}
+  #pinInput,#slugInput{font-family:'Nunito'; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px;}
+  #pinInput{width:150px; text-align:center; font-size:26px; letter-spacing:10px;}
+  #slugInput{width:230px; text-align:center; font-size:14px; display:block; margin:0 auto 12px;}
+  #pinBtn{display:block; margin:18px auto 0; background:linear-gradient(120deg,var(--teal),var(--blue)); color:#fff; border:none; padding:12px 30px; border-radius:40px; font-size:14px; font-weight:800; cursor:pointer;}
+  #pinErr{color:#B3372E; font-size:12.5px; margin-top:12px; display:none;}
+  #notfound .big{font-family:'Baloo 2'; font-size:19px; color:var(--ink); margin-bottom:8px;}
+
+  /* CARTEL DE INSTALACIÓN */
+  #installBanner{display:none; background:var(--ink); color:#fff; padding:11px 20px; font-size:12.5px; align-items:center; gap:10px;}
+  #installBanner .txt{flex:1; line-height:1.4;}
+  #installBanner button{background:var(--teal); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:'Nunito';}
+  #installBanner .close{background:transparent; color:rgba(255,255,255,.6); font-size:16px; padding:0 4px;}
+
+  /* ÁREA DE IMPRESIÓN / PDF */
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block !important; position:absolute; left:0; top:0; width:100%; padding:16px;}
+    .day-card{break-inside:avoid; page-break-inside:avoid; margin-bottom:10px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="installBanner">
+    <span class="txt" id="installTxt">Instalá Gravity en tu pantalla de inicio para entrar más rápido.</span>
+    <button id="installBtn" onclick="instalarApp()" style="display:none;">Instalar</button>
+    <button class="close" onclick="cerrarBanner()">✕</button>
+  </div>
+  <div id="appContent">
+    <div id="pinScreen" style="padding:100px 24px;">Cargando tu plan…</div>
+  </div>
+  <div id="printArea"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const DIA_ORDEN = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+  const DIAS_JS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"]; // getDay(): 0=Domingo
+  const HOY = DIAS_JS[new Date().getDay()];
+  const ZONE_VAR = { "Z1":"z1","Z2":"z2","Z3":"z3","Z4":"z4","Z5":"z5" };
+  const SVG_SUBE = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="19" x2="5" y2="14"/><line x1="12" y1="19" x2="12" y2="9"/><line x1="19" y1="19" x2="19" y2="4"/></svg>';
+  const SVG_BARRA = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="12" x2="20" y2="12"/><rect x="1.5" y="9" width="3.5" height="6" rx="1"/><rect x="19" y="9" width="3.5" height="6" rx="1"/></svg>';
+  const SVG_BAJA = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="19" x2="5" y2="4"/><line x1="12" y1="19" x2="12" y2="9"/><line x1="19" y1="19" x2="19" y2="14"/></svg>';
+
+  function initials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+  function mostrarPantallaPin(slug){
+    document.getElementById('appContent').innerHTML = `
+      <div id="pinScreen">
+        <div class="logo-txt">GRAVITY RUN CLUB</div>
+        <p class="prompt">Ingresá tu PIN de 4 dígitos para ver tu plan</p>
+        <input id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••">
+        <button id="pinBtn" onclick="validarPin('${slug}')">Entrar</button>
+        <div id="pinErr">PIN incorrecto. Probá de nuevo o consultale a tu entrenador.</div>
+        <p style="margin-top:24px; font-size:12px; color:var(--muted); cursor:pointer;" onclick="mostrarSelectorAtleta()">¿Es de otro atleta? Cambiar</p>
+      </div>`;
+    document.getElementById('pinInput').focus();
+    document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') validarPin(slug); });
+  }
+
+  function cerrarSesion(){ localStorage.removeItem('gravity_atleta'); mostrarSelectorAtleta(); }
+
+  function mostrarSelectorAtleta(){
+    document.getElementById('appContent').innerHTML = `
+      <div id="pinScreen">
+        <div class="logo-txt">GRAVITY RUN CLUB</div>
+        <p class="prompt">Ingresá con el usuario y PIN que te generó tu entrenador</p>
+        <input id="slugInput" type="text" placeholder="Usuario">
+        <input id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••">
+        <button id="pinBtn" onclick="validarPinManual()">Entrar</button>
+        <div id="pinErr">No encontramos ese usuario o el PIN está mal.</div>
+      </div>`;
+    document.getElementById('slugInput').focus();
+  }
+
+  async function validarPinManual(){
+    const slug = document.getElementById('slugInput').value.trim().toLowerCase();
+    const pin = document.getElementById('pinInput').value.trim();
+    const err = document.getElementById('pinErr'); err.style.display='none';
+    if(!slug || pin.length!==4) return;
+    const ok = await intentarConPin(slug, pin, false);
+    if(!ok){ err.textContent = ultimoErrorPin; err.style.display='block'; }
+  }
+
+  async function validarPin(slug){
+    const pin = document.getElementById('pinInput').value.trim();
+    const err = document.getElementById('pinErr'); err.style.display='none';
+    if(pin.length!==4) return;
+    const ok = await intentarConPin(slug, pin, false);
+    if(!ok){ err.textContent = ultimoErrorPin; err.style.display='block'; }
+  }
+
+  async function cargarAtleta(){
+    const params = new URLSearchParams(window.location.search);
+    let slug = params.get('a');
+    const recordado = JSON.parse(localStorage.getItem('gravity_atleta') || 'null');
+
+    if(!slug && recordado){
+      slug = recordado.slug;
+      const ok = await intentarConPin(slug, recordado.pin, true);
+      if(ok) return;
+    }
+    if(!slug){
+      mostrarSelectorAtleta();
+      return;
+    }
+    mostrarPantallaPin(slug);
+  }
+
+  let ultimoErrorPin = 'PIN incorrecto. Probá de nuevo o consultale a tu entrenador.';
+
+  async function intentarConPin(slug, pin, silencioso){
+    try{
+      const { data, error } = await sb.functions.invoke(FUNCION_LEER, { body: { slug, pin } });
+      if(error || !data || data.error){
+        if(data && data.error) ultimoErrorPin = data.error;
+        if(!silencioso) return false;
+        localStorage.removeItem('gravity_atleta');
+        mostrarPantallaPin(slug);
+        return true;
+      }
+      localStorage.setItem('gravity_atleta', JSON.stringify({slug,pin}));
+      renderPortal(data);
+      if(!silencioso) mostrarBannerInstalacion();
+      return true;
+    }catch(e){ return false; }
+  }
+
+  let SEMANAS = []; // lista de fechas de inicio de semana, más reciente primero
+  let SEMANA_IDX = 0;
+  let PLAN_COMPLETO = [];
+  let SEMANAS_F = [];
+  let SEMANA_F_IDX = 0;
+  let PLAN_FUERZA_COMPLETO = [];
+  let RUTINA_MANTENIMIENTO = [];
+  let REGISTRO = [];
+  let REGISTRO_PESOS = [];
+  let MARCAS_HISTORIAL = [];
+  let OBSERVACIONES = [];
+  let VISTA_PROGRESO = 'mes';
+
+  function renderPortal(data){
+    const { atleta, plan, zonas, ritmos, marcas, pf, planFuerza, registro, registroPesos, marcasHistorial, observaciones } = data;
+    PLAN_COMPLETO = plan || [];
+    SEMANAS = [...new Set(PLAN_COMPLETO.map(d=>d.semana_inicio))].sort().reverse();
+    SEMANA_IDX = 0;
+    PLAN_FUERZA_COMPLETO = planFuerza || [];
+    SEMANAS_F = [...new Set(PLAN_FUERZA_COMPLETO.map(d=>d.semana_inicio))].sort().reverse();
+    SEMANA_F_IDX = 0;
+    RUTINA_MANTENIMIENTO = pf || [];
+    REGISTRO = registro || [];
+    REGISTRO_PESOS = registroPesos || [];
+    MARCAS_HISTORIAL = marcasHistorial || [];
+    OBSERVACIONES = observaciones || [];
+    VISTA_PROGRESO = 'mes';
+
+    const tieneRunning = !!atleta.tiene_running;
+    const nivelFuerza = atleta.nivel_fuerza || 'ninguno'; // 'ninguno' | 'mantenimiento' | 'completo'
+    const soloFuerza = !tieneRunning && nivelFuerza !== 'ninguno';
+
+    // El header toma la identidad naranja de Fuerza solo si NO tiene running
+    // (si tiene los dos, el running manda como identidad principal).
+    const headerBg = soloFuerza
+      ? 'linear-gradient(135deg, var(--fuerza) 0%, var(--fuerza-dark) 68%, var(--fuerza-deep) 100%)'
+      : 'linear-gradient(135deg, var(--teal) 0%, var(--blue) 68%, var(--blue-deep) 100%)';
+    const weekTagTxt = soloFuerza ? '🏋️ Preparación Física' : atleta.subgrupo;
+
+    const zoneRows = (zonas||[]).slice().sort((a,b)=>b.porcentaje_max-a.porcentaje_max).map(z=>{
+      const zv = ZONE_VAR[z.zona]||'z2';
+      const pctTxt = z.porcentaje_min ? `${z.porcentaje_max}–${z.porcentaje_min}%` : `${z.porcentaje_max}%`;
+      const pulsoTxt = z.pulso_min ? `${Math.round(z.pulso_max)}–${Math.round(z.pulso_min)}` : `${Math.round(z.pulso_max)}`;
+      return `<div class="zone-row">
+        <span class="zone-dot" style="background:var(--${zv});"></span>
+        <span class="zone-name">${z.zona} · ${z.nombre_zona}</span>
+        <span class="zone-col"><span class="val">${pctTxt}</span><br><span class="lbl">%FC MÁX</span></span>
+        <span class="zone-col"><span class="val">${pulsoTxt}</span><br><span class="lbl">PPM</span></span>
+      </div>`;
+    }).join('');
+    const paceRows = (ritmos||[]).slice().sort((a,b)=>b.porcentaje-a.porcentaje).map(r=>`<tr><td class="pct-cell">${r.porcentaje}%</td><td>${r.ritmo}</td><td>${r.distancia||'—'}</td></tr>`).join('');
+    const marcasRows = (marcas||[]).map(m=>`<tr><td class="pct-cell">${m.distancia}</td><td>${m.tiempo}</td><td style="font-size:12px; color:var(--muted);">${m.notas||''}</td></tr>`).join('');
+    const pfRows = RUTINA_MANTENIMIENTO.map(p=>`<div class="pf-item"><span class="pf-name">${p.ejercicio}</span><span class="pf-scheme">${p.series} × ${p.repeticiones}</span></div>`).join('');
+
+    // Arma las pestañas dinámicamente según lo que este atleta tenga contratado
+    let tabs = [];
+    if(tieneRunning){
+      tabs.push({id:'semana', label:'Semana'});
+      tabs.push({id:'referencia', label:'Ritmos y zonas'});
+      tabs.push({id:'marcas', label:'Marcas proyectadas'});
+    }
+    if(nivelFuerza !== 'ninguno'){
+      tabs.push({id:'fuerza', label: soloFuerza ? 'Semana' : 'Fuerza'});
+    }
+    tabs.push({id:'progreso', label:'Progreso'});
+    tabs.push({id:'perfil', label:'Perfil'});
+    const primerTab = tabs[0].id;
+
+    const tabBtns = tabs.map((t,i) => `<button class="tab-btn${i===0?' active':''}" id="nav-${t.id}" onclick="goTab('${t.id}')">${t.label}</button>`).join('');
+
+    document.getElementById('appContent').innerHTML = `
+      <div class="header" id="portalHeader" style="background:${headerBg};">
+        <div class="header-top">
+          <span class="brand-label">GRAVITY RUN CLUB</span>
+          <div class="avatar" onclick="goTab('perfil')">${initials(atleta.nombre)}</div>
+        </div>
+        <h1 class="athlete-name">Hola, ${atleta.nombre.split(' ')[0]}</h1>
+        <p class="week-range" id="weekRangeLabel"></p>
+        <span class="week-tag">${weekTagTxt}</span>
+      </div>
+      ${tieneRunning ? '<div class="volume-strip" id="volumeStrip"></div>' : ''}
+      <div class="tabbar">${tabBtns}</div>
+      <div class="content">
+        ${tieneRunning ? `
+        <div id="tab-semana" class="tab-panel active">
+          <div class="week-nav">
+            <button id="weekPrev" onclick="cambiarSemana(1)">‹ Anterior</button>
+            <span id="weekNavLabel" class="mono"></span>
+            <button id="weekNext" onclick="cambiarSemana(-1)">Siguiente ›</button>
+          </div>
+          <div id="semanaContent"></div>
+          <button class="pdf-btn" onclick="descargarPDF()">⬇ Descargar esta semana en PDF</button>
+        </div>
+        <div id="tab-referencia" class="tab-panel">
+          <p class="section-label">ZONAS DE FRECUENCIA CARDÍACA</p>
+          <div class="card">${zoneRows || '<p class="empty-note">Sin datos cargados aún.</p>'}</div>
+          <p class="section-label">TABLA DE RITMOS</p>
+          <div class="card"><table class="data-table"><tr><th>%</th><th>Ritmo</th><th>Distancia</th></tr>${paceRows}</table>${!(ritmos||[]).length?'<p class="empty-note">Sin datos cargados aún.</p>':''}</div>
+        </div>
+        <div id="tab-marcas" class="tab-panel">
+          <p class="section-label">MARCAS PROYECTADAS</p>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Objetivos de tiempo que tu entrenador proyecta para distancias más allá de tu marca actual.</p>
+          <div class="card"><table class="data-table"><tr><th>Distancia</th><th>Tiempo</th><th>Notas</th></tr>${marcasRows}</table>${!(marcas||[]).length?'<p class="empty-note">Todavía no hay marcas proyectadas cargadas.</p>':''}</div>
+        </div>` : ''}
+        ${nivelFuerza === 'mantenimiento' ? `
+        <div id="tab-fuerza" class="tab-panel${!tieneRunning?' active':''}">
+          <p class="section-label" style="color:var(--fuerza-dark);">RUTINA DE FUERZA — MANTENIMIENTO</p>
+          <div class="card" style="border-left:3px solid var(--fuerza);">${pfRows || '<p class="empty-note">Sin rutina cargada aún.</p>'}</div>
+        </div>` : ''}
+        ${nivelFuerza === 'completo' ? `
+        <div id="tab-fuerza" class="tab-panel${!tieneRunning?' active':''}">
+          ${tieneRunning ? '' : `<div class="week-nav">
+            <button id="weekPrevF" onclick="cambiarSemanaFuerza(1)">‹ Anterior</button>
+            <span id="weekNavLabelF" class="mono"></span>
+            <button id="weekNextF" onclick="cambiarSemanaFuerza(-1)">Siguiente ›</button>
+          </div>`}
+          <div id="semanaContentF"></div>
+        </div>` : ''}
+        <div id="tab-progreso" class="tab-panel">
+          <div class="prog-toggle">
+            <button id="progToggleMes" class="prog-toggle-btn active" onclick="cambiarVistaProgreso('mes')">Mes</button>
+            <button id="progToggleAnio" class="prog-toggle-btn" onclick="cambiarVistaProgreso('anio')">Año</button>
+          </div>
+          <div id="progresoContent"></div>
+        </div>
+        <div id="tab-perfil" class="tab-panel">
+          <div class="card">
+            <div class="profile-header">
+              <div class="profile-avatar">${initials(atleta.nombre)}</div>
+              <div><div style="font-weight:800; font-size:15px;">${atleta.nombre}</div><div style="font-size:12.5px; color:var(--muted);">${atleta.disciplina||atleta.subgrupo} · Gravity Run Club</div></div>
+            </div>
+          </div>
+          <div class="card install-btn" onclick="abrirInstalacion()">📲 Instalar la app en este celular</div>
+          <div id="installHelp" class="card" style="display:none; font-size:12.5px; color:var(--muted); line-height:1.6;"></div>
+          <div class="card install-btn" id="notifBtn" onclick="activarNotificaciones()">🔔 Avisame los días que tengo entreno</div>
+          <div id="notifMsg" style="display:none; font-size:12px; text-align:center; margin-top:-6px; margin-bottom:6px;"></div>
+          <div class="card logout-btn" onclick="cerrarSesion()">Cerrar sesión</div>
+        </div>
+      </div>`;
+
+    if(tieneRunning) renderSemana();
+    if(nivelFuerza === 'completo') renderSemanaFuerza();
+    renderProgreso();
+  }
+  function renderSemana(){
+    const semanaSel = SEMANAS[SEMANA_IDX];
+    const dias = PLAN_COMPLETO.filter(d=>d.semana_inicio===semanaSel).sort((a,b)=>DIA_ORDEN.indexOf(a.dia)-DIA_ORDEN.indexOf(b.dia));
+    const sesiones = dias.filter(d=>d.tipo==='Entreno').length;
+    const descansos = dias.filter(d=>d.tipo==='Descanso').length;
+    const vol = dias.reduce((acc,d)=>{ if(d.dist_min_km) acc.min+=Number(d.dist_min_km); if(d.dist_max_km) acc.max+=Number(d.dist_max_km); return acc; }, {min:0,max:0});
+
+    document.getElementById('weekRangeLabel').textContent = dias.length ? formatSemana(semanaSel) : 'Sin semanas cargadas todavía';
+    document.getElementById('volumeStrip').innerHTML = `
+      <div class="volume-item"><div class="num">${vol.min}${vol.max?'–'+vol.max:''}k</div><div class="label">VOLUMEN</div></div>
+      <div class="volume-item"><div class="num">${sesiones}</div><div class="label">SESIONES</div></div>
+      <div class="volume-item"><div class="num">${descansos}</div><div class="label">DESCANSOS</div></div>`;
+
+    document.getElementById('weekNavLabel').textContent = SEMANAS.length ? formatSemanaCorta(semanaSel) : '';
+    document.getElementById('weekPrev').disabled = SEMANA_IDX >= SEMANAS.length - 1;
+    document.getElementById('weekNext').disabled = SEMANA_IDX <= 0;
+
+    // Agrupa las filas por día (un día puede tener varias filas, una por fase)
+    const diasAgrupados = {};
+    dias.forEach(d => { (diasAgrupados[d.dia] = diasAgrupados[d.dia] || []).push(d); });
+
+    const FASE_STYLE = {
+      'Entrada en calor': { color:'var(--calor)', bg:'var(--calor-bg)', ic:SVG_SUBE },
+      'Principal':         { color:'var(--core)',  bg:'var(--core-bg)',  ic:SVG_BARRA },
+      'Afloje':            { color:'var(--afloje)', bg:'var(--afloje-bg)', ic:SVG_BAJA },
+    };
+
+    const diaCards = Object.keys(diasAgrupados).sort((a,b)=>DIA_ORDEN.indexOf(a)-DIA_ORDEN.indexOf(b)).map(nombreDia=>{
+      const filas = diasAgrupados[nombreDia];
+      const d0 = filas[0];
+
+      if(d0.tipo==='Descanso'){
+        return `<div class="day-card"><div class="day-head" onclick="this.parentElement.classList.toggle('open')"><div class="day-dot rest"></div><div class="day-info"><div class="day-name-row"><span class="day-name">${nombreDia}</span></div><div class="day-type">Descanso</div></div><span class="chevron">▾</span></div><div class="rest-detail">Día libre — aprovechá para elongar o hacer movilidad suave.</div></div>`;
+      }
+
+      const today = fechaExactaDelDia(semanaSel, nombreDia) === hoyISO();
+      const distMinTotal = filas.reduce((a,f)=>a+(Number(f.dist_min_km)||0), 0);
+      const distMaxTotal = filas.reduce((a,f)=>a+(Number(f.dist_max_km)||0), 0);
+      const feedbackId = `fb-${semanaSel}-${nombreDia}`.replace(/\s+/g,'');
+      const bloqueFeedback = renderBloqueFeedbackRunning(feedbackId, semanaSel, nombreDia, d0);
+
+      // Día simple: una sola fila, sin fase -> igual que siempre
+      if(filas.length === 1 && !d0.fase){
+        const zv = ZONE_VAR[(d0.zona||'').toUpperCase().slice(0,2)] || 'z2';
+        return `<div class="day-card${today?' today open':''}">
+          <div class="day-head" onclick="this.parentElement.classList.toggle('open')">
+            <div class="day-dot" style="background:var(--${zv});"></div>
+            <div class="day-info"><div class="day-name-row"><span class="day-name">${nombreDia}</span>${today?'<span class="today-pill">HOY</span>':''}</div><div class="day-type">${d0.sesion||''}</div></div>
+            ${d0.zona?`<span class="zone-badge" style="background:var(--${zv}-bg); color:var(--${zv});">${d0.zona}</span>`:''}
+            <span class="chevron">▾</span>
+          </div>
+          <div class="day-detail">
+            <p class="day-workout">${d0.descripcion||''}</p>
+            <div class="day-meta">${d0.dist_min_km?`<span><b>${d0.dist_min_km}${d0.dist_max_km&&d0.dist_max_km!=d0.dist_min_km?'–'+d0.dist_max_km:''}k</b> distancia</span>`:''}${d0.zona?`<span><b>${d0.zona}</b> predominante</span>`:''}</div>
+            ${bloqueFeedback}
+          </div>
+        </div>`;
+      }
+
+      // Día con fases: cada fila se muestra como su propio bloque coloreado
+      const orden = ['Entrada en calor','Principal','Afloje'];
+      const filasOrdenadas = [...filas].sort((a,b)=>orden.indexOf(a.fase)-orden.indexOf(b.fase));
+      const fasesHTML = filasOrdenadas.map(f=>{
+        const est = FASE_STYLE[f.fase] || FASE_STYLE['Principal'];
+        const zv = ZONE_VAR[(f.zona||'').toUpperCase().slice(0,2)] || 'z2';
+        return `<div class="pf-subsection" style="background:${est.bg};">
+          <p class="pf-subtitle" style="color:${est.color};"><span class="ic">${est.ic}</span>${f.fase||'Principal'}</p>
+          <p class="day-workout" style="margin-bottom:6px;">${f.descripcion||''}</p>
+          <div class="day-meta">${f.dist_min_km?`<span><b>${f.dist_min_km}${f.dist_max_km&&f.dist_max_km!=f.dist_min_km?'–'+f.dist_max_km:''}k</b></span>`:''}${f.zona?`<span class="zone-badge" style="background:var(--${zv}-bg); color:var(--${zv});">${f.zona}</span>`:''}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="day-card${today?' today open':''}">
+        <div class="day-head" onclick="this.parentElement.classList.toggle('open')">
+          <div class="day-dot" style="background:var(--core);"></div>
+          <div class="day-info"><div class="day-name-row"><span class="day-name">${nombreDia}</span>${today?'<span class="today-pill">HOY</span>':''}</div><div class="day-type">${d0.sesion||''}</div></div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="day-detail">
+          ${fasesHTML}
+          ${(distMinTotal||distMaxTotal) ? `<div class="day-meta" style="margin-top:8px;"><span><b>${distMinTotal}${distMaxTotal&&distMaxTotal!=distMinTotal?'–'+distMaxTotal:''}k</b> distancia total</span></div>` : ''}
+          ${bloqueFeedback}
+        </div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('semanaContent').innerHTML = dias.length
+      ? `<div class="day-grid">${diaCards}</div>`
+      : '<p class="empty-note">Todavía no hay plan cargado para esta semana.</p>';
+  }
+
+  // ------------------------------------------------------------
+  // FEEDBACK DEL ATLETA — running
+  // ------------------------------------------------------------
+  // Edge Functions en producción: dynamic-processor (lectura, ya en uso)
+  // y rapid-task (guardar progreso, creada ahora).
+  const FUNCION_LEER = 'dynamic-processor';
+  const FUNCION_GUARDAR = 'rapid-task';
+
+  function renderBloqueFeedbackRunning(id, semanaISO, dia, d0){
+    if(d0.completado){
+      const ritmoLabel = {debajo:'Por debajo', en_rango:'En rango', encima:'Por encima'}[d0.ritmo_feedback] || '';
+      const ritmoColor = {debajo:'var(--z4)', en_rango:'var(--calor)', encima:'var(--core)'}[d0.ritmo_feedback] || 'var(--muted)';
+      return `<div class="feedback-done">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <span style="color:var(--calor); font-weight:800; font-size:12.5px;">✓ Hecho</span>
+          ${d0.km_reales?`<span class="mono" style="font-size:11.5px; color:var(--muted);">· ${d0.km_reales}k</span>`:''}
+          ${ritmoLabel?`<span style="font-size:10.5px; font-weight:700; color:${ritmoColor};">· ${ritmoLabel}</span>`:''}
+        </div>
+        ${d0.observacion_atleta?`<p style="font-size:12px; color:var(--muted); margin-top:4px; font-style:italic;">"${d0.observacion_atleta}"</p>`:''}
+        <button class="feedback-edit-btn" onclick="event.stopPropagation(); mostrarFormFeedback('${id}')">Editar</button>
+        <div id="${id}-form" class="feedback-form" style="display:none;" data-semana="${semanaISO}" data-dia="${dia}" data-distmin="${d0.dist_min_km||''}" data-distmax="${d0.dist_max_km||''}"></div>
+      </div>`;
+    }
+    return `<div>
+      <button class="feedback-btn" onclick="event.stopPropagation(); mostrarFormFeedback('${id}')">Marcar como hecho</button>
+      <div id="${id}-form" class="feedback-form" style="display:none;" data-semana="${semanaISO}" data-dia="${dia}" data-distmin="${d0.dist_min_km||''}" data-distmax="${d0.dist_max_km||''}"></div>
+    </div>`;
+  }
+
+  function mostrarFormFeedback(id){
+    const formDiv = document.getElementById(id+'-form');
+    if(!formDiv) return;
+    if(formDiv.style.display === 'block'){ formDiv.style.display = 'none'; return; }
+    if(!formDiv.dataset.armado){
+      formDiv.innerHTML = `
+        <label class="fb-label">KM REALES (OPCIONAL)</label>
+        <input type="number" step="0.1" class="fb-input fb-km" placeholder="7.5">
+        <label class="fb-label" style="margin-top:8px; display:block;">RITMO EN LA PARTE PRINCIPAL</label>
+        <p class="fb-hint">(el tramo central del entreno, no la entrada en calor ni el afloje)</p>
+        <div class="fb-ritmo-bar">
+          <button type="button" class="fb-ritmo-btn" data-val="debajo" onclick="event.stopPropagation(); elegirRitmo(this,'${id}')">Por debajo</button>
+          <button type="button" class="fb-ritmo-btn" data-val="en_rango" onclick="event.stopPropagation(); elegirRitmo(this,'${id}')">En rango</button>
+          <button type="button" class="fb-ritmo-btn" data-val="encima" onclick="event.stopPropagation(); elegirRitmo(this,'${id}')">Por encima</button>
+        </div>
+        <label class="fb-label" style="margin-top:8px; display:block;">OBSERVACIÓN (OPCIONAL)</label>
+        <input type="text" class="fb-input fb-obs" placeholder="Me costó el último tramo">
+        <button type="button" class="fb-save-btn" onclick="event.stopPropagation(); guardarFeedbackRunning('${id}')">Guardar</button>
+        <div class="fb-msg" style="display:none;"></div>`;
+      formDiv.dataset.armado = '1';
+    }
+    formDiv.style.display = 'block';
+  }
+
+  function elegirRitmo(btn, id){
+    const formDiv = document.getElementById(id+'-form');
+    formDiv.querySelectorAll('.fb-ritmo-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    formDiv.dataset.ritmo = btn.dataset.val;
+  }
+
+  async function guardarFeedbackRunning(id){
+    const formDiv = document.getElementById(id+'-form');
+    const msg = formDiv.querySelector('.fb-msg');
+    const recordado = JSON.parse(localStorage.getItem('gravity_atleta')||'null');
+    if(!recordado) return;
+    const km = formDiv.querySelector('.fb-km').value;
+    const obs = formDiv.querySelector('.fb-obs').value;
+    msg.style.display = 'block'; msg.style.color = 'var(--muted)'; msg.textContent = 'Guardando…';
+    try{
+      const { data, error } = await sb.functions.invoke(FUNCION_GUARDAR, { body: {
+        slug: recordado.slug, pin: recordado.pin, tipo: 'running',
+        semanaInicio: formDiv.dataset.semana, dia: formDiv.dataset.dia, completado: true,
+        kmReales: km ? parseFloat(km) : null,
+        ritmoFeedback: formDiv.dataset.ritmo || null,
+        observacion: obs || null,
+        distMin: formDiv.dataset.distmin ? parseFloat(formDiv.dataset.distmin) : null,
+        distMax: formDiv.dataset.distmax ? parseFloat(formDiv.dataset.distmax) : null,
+      }});
+      if(error || !data || data.error){
+        msg.style.color = '#B3372E'; msg.textContent = 'No se pudo guardar. Probá de nuevo.';
+        return;
+      }
+      msg.style.color = '#0B8F82'; msg.textContent = '¡Guardado!';
+      setTimeout(()=>{ intentarConPin(recordado.slug, recordado.pin, true); }, 800);
+    }catch(e){
+      msg.style.color = '#B3372E'; msg.textContent = 'No se pudo guardar. Probá de nuevo.';
+    }
+  }
+
+  function cambiarSemana(delta){
+    const nuevo = SEMANA_IDX + delta;
+    if(nuevo < 0 || nuevo >= SEMANAS.length) return;
+    SEMANA_IDX = nuevo;
+    renderSemana();
+  }
+
+  function descargarPDF(){
+    const nombre = document.querySelector('.athlete-name').textContent.replace('Hola, ','');
+    const semanaTxt = document.getElementById('weekRangeLabel').textContent;
+
+    const printArea = document.getElementById('printArea');
+    printArea.innerHTML = `
+      <div style="background:linear-gradient(135deg,#12C0AE,#2E3AC0 68%,#1A1F6E); color:#fff; padding:20px 24px; border-radius:14px; margin-bottom:18px;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em;">GRAVITY RUN CLUB</div>
+        <div style="font-family:'Baloo 2',sans-serif; font-size:24px; font-weight:800; margin-top:6px;">${nombre}</div>
+        <div style="font-size:13px; margin-top:2px;">${semanaTxt}</div>
+      </div>
+      ${document.getElementById('semanaContent').innerHTML}`;
+
+    // Los detalles colapsados tienen que verse abiertos al imprimir
+    printArea.querySelectorAll('.day-detail').forEach(d => d.style.display = 'block');
+    printArea.querySelectorAll('.chevron').forEach(c => c.style.display = 'none');
+    const grid = printArea.querySelector('.day-grid');
+    if(grid) grid.style.display = 'block';
+
+    window.print();
+  }
+
+  function formatSemanaCorta(fechaISO){
+    if(!fechaISO) return '';
+    const d = new Date(fechaISO+'T00:00:00');
+    return d.toLocaleDateString('es-AR',{day:'numeric',month:'short'});
+  }
+
+  // Fecha exacta de un día dentro de una semana, calculada a partir del lunes.
+  function fechaExactaDelDia(semanaInicioISO, dia){
+    if(!semanaInicioISO) return null;
+    const offset = DIA_ORDEN.indexOf(dia);
+    if(offset < 0) return null;
+    const d = new Date(semanaInicioISO+'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + offset);
+    return d.toISOString().slice(0,10);
+  }
+
+  function hoyISO(){
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ==============================================================
+  // PREPARACIÓN FÍSICA — plan de fuerza por bloques (Día 1, Día 2...)
+  // ==============================================================
+  function formatearPeso(peso){
+    const txt = String(peso).trim();
+    // Si es un número solo (con o sin decimales), le agrega "kg".
+    // Si ya trae una unidad, o es texto cualitativo ("Medio", "Progresivo"), lo deja igual.
+    return /^\d+([.,]\d+)?$/.test(txt) ? `${txt} kg` : txt;
+  }
+
+  function renderSemanaFuerza(){
+    const semanaSel = SEMANAS_F[SEMANA_F_IDX];
+    const items = PLAN_FUERZA_COMPLETO.filter(d=>d.semana_inicio===semanaSel);
+    const navLabel = document.getElementById('weekNavLabelF');
+    if(navLabel) navLabel.textContent = SEMANAS_F.length ? formatSemanaCorta(semanaSel) : '';
+    const prevBtn = document.getElementById('weekPrevF');
+    const nextBtn = document.getElementById('weekNextF');
+    if(prevBtn) prevBtn.disabled = SEMANA_F_IDX >= SEMANAS_F.length - 1;
+    if(nextBtn) nextBtn.disabled = SEMANA_F_IDX <= 0;
+
+    const bloques = [...new Set(items.map(i=>i.bloque))];
+    const encabezado = items.length
+      ? `<p style="font-size:12.5px; color:var(--muted); margin-bottom:14px;">${formatSemana(semanaSel)}</p>`
+      : '';
+    const ORDEN_TIPO = ['Entrada en calor', 'Ejercicio', 'Afloje'];
+    const ESTILO_TIPO = {
+      'Entrada en calor': { color:'var(--calor)', bg:'var(--calor-bg)', ic:SVG_SUBE },
+      'Ejercicio':         { color:'var(--core)',  bg:'var(--core-bg)',  ic:SVG_BARRA },
+      'Afloje':            { color:'var(--afloje)', bg:'var(--afloje-bg)', ic:SVG_BAJA },
+    };
+    const bloquesHTML = bloques.map(b => {
+      const ejerciciosBloque = items.filter(i=>i.bloque===b).sort((a,c)=>a.orden-c.orden);
+      const yaCompletado = ejerciciosBloque.length && ejerciciosBloque.every(e=>e.completado);
+
+      const seccionesHTML = ORDEN_TIPO.map(tipo => {
+        const deEsteTipo = ejerciciosBloque.filter(e => (e.tipo || 'Ejercicio') === tipo);
+        if(!deEsteTipo.length) return '';
+        const est = ESTILO_TIPO[tipo];
+        const rows = deEsteTipo.map((e, idx) => `
+          <div class="pf-item">
+            <div>
+              <div style="font-weight:700; font-size:13.5px; color:var(--ink);">${tipo==='Ejercicio' ? `${idx+1}. ` : ''}${e.ejercicio}</div>
+              ${e.detalle ? `<div style="font-size:11.5px; color:var(--muted); margin-top:2px;">${e.detalle}</div>` : ''}
+              ${e.peso ? `<div style="font-size:11px; color:${est.color}; margin-top:2px; font-family:'JetBrains Mono'; font-weight:600;">Peso pedido: ${formatearPeso(e.peso)}</div>` : ''}
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="pf-scheme">${e.series?e.series+' × ':''}${e.repeticiones||''}</span>
+              ${tipo==='Ejercicio' ? `<div style="display:flex; align-items:center; background:#fff; border:1.5px solid ${est.color}; border-radius:8px; padding:4px 8px 4px 6px; gap:2px;"><span style="font-size:13px; color:${est.color}; font-weight:800;">+</span><input class="peso-logrado-input" data-ejercicio-id="${e.id}" data-ejercicio-nombre="${e.ejercicio}" placeholder="0" value="${e.peso_logrado||''}" style="width:26px; border:none; font-size:12px; font-weight:700; text-align:right; color:var(--ink); background:transparent;"><span style="font-size:10px; color:${est.color}; font-weight:700;">kg</span></div>` : ''}
+            </div>
+          </div>`).join('');
+        return `
+          <div class="pf-subsection" style="background:${est.bg};">
+            <p class="pf-subtitle" style="color:${est.color};"><span class="ic">${est.ic}</span>${tipo}</p>
+            ${tipo==='Ejercicio' ? `<p style="font-size:10.5px; color:var(--muted); font-style:italic; margin:-2px 0 8px;">Anotá el peso máx que usaste en cada ejercicio (opcional)</p>` : ''}
+            ${rows}
+          </div>`;
+      }).join('');
+
+      const bloqueId = `fbf-${semanaSel}-${b}`.replace(/\s+/g,'');
+      const bloqueFeedback = `
+        ${yaCompletado ? `<div style="color:var(--calor); font-weight:800; font-size:12.5px; margin-top:10px;">✓ Bloque completado — podés seguir editando el peso si hace falta</div>` : ''}
+        <button class="feedback-btn" style="margin-top:8px;" onclick="guardarFeedbackFuerza('${bloqueId}','${semanaSel}','${b}',this)">${yaCompletado?'Guardar cambios':'Marcar bloque como hecho'}</button>
+        <div class="fb-msg" id="${bloqueId}-msg" style="display:none;"></div>`;
+
+      return `<div class="card" style="border-left:3px solid var(--fuerza);">
+        <p class="section-label" style="color:var(--fuerza-dark);">${b.toUpperCase()}</p>
+        ${seccionesHTML}
+        ${bloqueFeedback}
+      </div>`;
+    }).join('');
+
+    document.getElementById('semanaContentF').innerHTML = encabezado + (bloques.length ? bloquesHTML : '<p class="empty-note">Todavía no hay plan cargado para esta semana.</p>');
+  }
+
+  function cambiarSemanaFuerza(delta){
+    const nuevo = SEMANA_F_IDX + delta;
+    if(nuevo < 0 || nuevo >= SEMANAS_F.length) return;
+    SEMANA_F_IDX = nuevo;
+    renderSemanaFuerza();
+  }
+
+  async function guardarFeedbackFuerza(bloqueId, semanaInicio, bloque, btnEl){
+    const recordado = JSON.parse(localStorage.getItem('gravity_atleta')||'null');
+    if(!recordado) return;
+    const msg = document.getElementById(bloqueId+'-msg');
+    const card = btnEl.closest('.card');
+    const textoOriginal = btnEl.textContent;
+    const pesos = Array.from(card.querySelectorAll('.peso-logrado-input'))
+      .filter(inp => inp.value.trim())
+      .map(inp => ({ id: inp.dataset.ejercicioId, ejercicio: inp.dataset.ejercicioNombre, pesoLogrado: inp.value.trim() }));
+
+    btnEl.disabled = true; btnEl.textContent = 'Guardando…';
+    try{
+      const { data, error } = await sb.functions.invoke(FUNCION_GUARDAR, { body: {
+        slug: recordado.slug, pin: recordado.pin, tipo: 'fuerza',
+        semanaInicio, bloque, completado: true, pesos,
+        // Sin "fecha" acá — la Edge Function usa la fecha real de hoy (el
+        // momento en que el atleta toca el botón), para que dos bloques
+        // completados en la misma semana no se pisen entre sí.
+      }});
+      if(error || !data || data.error){
+        msg.style.display='block'; msg.style.color='#B3372E'; msg.textContent = 'No se pudo guardar. Probá de nuevo.';
+        btnEl.disabled = false; btnEl.textContent = textoOriginal;
+        return;
+      }
+      setTimeout(()=>{ intentarConPin(recordado.slug, recordado.pin, true); }, 500);
+    }catch(e){
+      msg.style.display='block'; msg.style.color='#B3372E'; msg.textContent = 'No se pudo guardar. Probá de nuevo.';
+      btnEl.disabled = false; btnEl.textContent = textoOriginal;
+    }
+  }
+
+  function cambiarVistaProgreso(vista){
+    VISTA_PROGRESO = vista;
+    document.getElementById('progToggleMes').classList.toggle('active', vista==='mes');
+    document.getElementById('progToggleAnio').classList.toggle('active', vista==='anio');
+    renderProgreso();
+  }
+
+  function renderProgreso(){
+    const cont = document.getElementById('progresoContent');
+    if(!cont) return;
+
+    const hoyD = new Date();
+    const mesActualStr = `${hoyD.getFullYear()}-${String(hoyD.getMonth()+1).padStart(2,'0')}`;
+
+    // ---- Nota(s) del entrenador ----
+    let notaHTML = '';
+    if(VISTA_PROGRESO === 'mes'){
+      const notasDelMes = OBSERVACIONES.filter(o => o.semana_inicio && o.semana_inicio.startsWith(mesActualStr)).sort((a,b)=>b.semana_inicio.localeCompare(a.semana_inicio));
+      if(notasDelMes.length){
+        notaHTML = notasDelMes.map((n,i) => i===0 ? `<div class="prog-note">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+            <span style="font-family:'JetBrains Mono'; font-size:10px; font-weight:700; letter-spacing:.03em;">NOTA DEL ENTRENADOR — ${formatSemana(n.semana_inicio).toUpperCase()}</span>
+          </div>
+          <p style="font-size:13px; line-height:1.5; margin:0;">${n.texto}</p>
+        </div>` : `<div class="prog-card">
+          <p class="section-label">${formatSemana(n.semana_inicio)}</p>
+          <p style="font-size:12.5px; margin:0;">${n.texto}</p>
+        </div>`).join('');
+      }
+    } else {
+      const notas = OBSERVACIONES.slice(0,8);
+      if(notas.length){
+        notaHTML = `<div class="prog-card"><p class="section-label">NOTAS DEL ENTRENADOR</p>` +
+          notas.map(n => `<div style="padding:8px 0; border-bottom:1px solid var(--line);"><div style="font-family:'JetBrains Mono'; font-size:10px; color:var(--muted); margin-bottom:3px;">${formatSemana(n.semana_inicio)}</div><p style="font-size:12.5px; margin:0;">${n.texto}</p></div>`).join('') +
+          `</div>`;
+      }
+    }
+
+    // ---- Datos del período (mes actual o año completo) ----
+    const registrosPeriodo = VISTA_PROGRESO === 'mes'
+      ? REGISTRO.filter(r => r.fecha.startsWith(mesActualStr))
+      : REGISTRO.filter(r => r.fecha.startsWith(String(hoyD.getFullYear())));
+
+    const completados = registrosPeriodo.filter(r=>r.completado).length;
+    const total = registrosPeriodo.length;
+    const pct = total ? Math.round(completados/total*100) : 0;
+
+    const statsHTML = `<div class="prog-stat-grid">
+      <div class="prog-stat"><div class="num">${completados}/${total}</div><div class="lbl">entrenos completados</div></div>
+      <div class="prog-stat"><div class="num" style="color:var(--calor);">${pct}%</div><div class="lbl">adherencia</div></div>
+    </div>`;
+
+    // ---- Calendario (mes) o barras por mes (año) ----
+    let cumplimientoHTML = '';
+    if(VISTA_PROGRESO === 'mes'){
+      cumplimientoHTML = renderCalendarioMes(hoyD, registrosPeriodo);
+    } else {
+      cumplimientoHTML = renderBarrasAnio(hoyD.getFullYear());
+    }
+
+    // ---- Distribución de ritmo ----
+    const conRitmo = registrosPeriodo.filter(r=>r.tipo==='running' && r.ritmo_feedback);
+    const debajo = conRitmo.filter(r=>r.ritmo_feedback==='debajo').length;
+    const enRango = conRitmo.filter(r=>r.ritmo_feedback==='en_rango').length;
+    const encima = conRitmo.filter(r=>r.ritmo_feedback==='encima').length;
+    const totalRitmo = debajo + enRango + encima;
+    let ritmoHTML = '';
+    if(totalRitmo){
+      ritmoHTML = `<div class="prog-card">
+        <p class="section-label">DISTRIBUCIÓN DE RITMO</p>
+        <div style="display:flex; height:20px; border-radius:6px; overflow:hidden;">
+          ${debajo?`<div style="flex:${debajo}; background:var(--z4);"></div>`:''}
+          ${enRango?`<div style="flex:${enRango}; background:var(--calor);"></div>`:''}
+          ${encima?`<div style="flex:${encima}; background:var(--core);"></div>`:''}
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--muted);">
+          <span><b style="color:var(--z4);">${debajo}</b> por debajo</span>
+          <span><b style="color:var(--calor);">${enRango}</b> en rango</span>
+          <span><b style="color:var(--core);">${encima}</b> por encima</span>
+        </div>
+      </div>`;
+    }
+
+    // ---- Progresión de peso (siempre todo el historial disponible) ----
+    let pesoHTML = '';
+    const ejercicios = [...new Set(REGISTRO_PESOS.map(p=>p.ejercicio))];
+    if(ejercicios.length){
+      pesoHTML = ejercicios.map(ej => {
+        const puntos = REGISTRO_PESOS.filter(p=>p.ejercicio===ej).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+        if(puntos.length < 2) return '';
+        return `<div class="prog-card">
+          <p class="section-label">PROGRESIÓN DE PESO — ${ej.toUpperCase()}</p>
+          ${renderLineaSVG(puntos.map(p=>parseFloat(p.peso_logrado)||0))}
+        </div>`;
+      }).join('');
+    }
+
+    // ---- Evolución de marcas ----
+    let marcasHTML = '';
+    if(MARCAS_HISTORIAL.length){
+      marcasHTML = `<div class="prog-card"><p class="section-label">EVOLUCIÓN DE MARCAS</p>` +
+        MARCAS_HISTORIAL.slice().reverse().map(m => `
+          <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);">
+            <div style="flex:1;"><div style="font-size:13px; font-weight:700;">${m.distancia}</div><div style="font-size:10px; color:var(--muted);">${formatFechaLarga(m.fecha)}</div></div>
+            <div style="text-align:right;"><div style="font-size:11px; color:var(--muted); text-decoration:line-through;">${m.tiempo_anterior||''}</div><div style="font-size:13px; font-weight:700; color:var(--calor);">${m.tiempo_nuevo}</div></div>
+          </div>`).join('') + `</div>`;
+    }
+
+    // ---- Km reales vs. rango pedido ----
+    const kmHTML = renderBarrasKm(VISTA_PROGRESO, registrosPeriodo, hoyD.getFullYear());
+
+    cont.innerHTML = notaHTML + statsHTML +
+      `<div class="prog-card">${cumplimientoHTML}</div>` +
+      kmHTML + ritmoHTML + pesoHTML + marcasHTML +
+      (!total && !totalRitmo && !ejercicios.length && !MARCAS_HISTORIAL.length ? '<p class="prog-empty">Todavía no hay entrenos marcados como hechos en este período.</p>' : '');
+  }
+
+  function renderBarrasKm(vista, registrosPeriodo, anio){
+    const corridas = registrosPeriodo.filter(r=>r.tipo==='running' && (r.km_reales!=null));
+    if(!corridas.length) return '';
+
+    let buckets = [];
+    if(vista === 'mes'){
+      const porSemana = {};
+      corridas.forEach(r=>{
+        const d = new Date(r.fecha+'T00:00:00');
+        const semana = Math.ceil((d.getDate() + ((d.getDay()+6)%7))/7);
+        const key = 'S'+semana;
+        if(!porSemana[key]) porSemana[key] = {km:0, min:0, max:0};
+        porSemana[key].km += r.km_reales;
+        porSemana[key].min += Number(r.dist_min_km)||0;
+        porSemana[key].max += Number(r.dist_max_km)||0;
+      });
+      buckets = Object.keys(porSemana).sort().map(k=>({label:k, ...porSemana[k]}));
+    } else {
+      const MESES = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+      const porMes = {};
+      corridas.forEach(r=>{
+        const m = parseInt(r.fecha.slice(5,7))-1;
+        if(!porMes[m]) porMes[m] = {km:0, min:0, max:0};
+        porMes[m].km += r.km_reales;
+        porMes[m].min += Number(r.dist_min_km)||0;
+        porMes[m].max += Number(r.dist_max_km)||0;
+      });
+      buckets = Object.keys(porMes).sort((a,b)=>a-b).map(m=>({label:MESES[m], ...porMes[m]}));
+    }
+    if(!buckets.length) return '';
+
+    const maxKm = Math.max(...buckets.map(b=>Math.max(b.km,b.max)), 1);
+    const maxAltura = 70;
+    const ancho = 320, n = buckets.length;
+    const anchoBarra = Math.min(24, (ancho-20)/n - 8);
+    let barras = '', labels = '';
+    buckets.forEach((b,i)=>{
+      const x = 15 + i*((ancho-20)/n);
+      const alto = (b.km/maxKm)*maxAltura;
+      let color = '#2E3AC0';
+      if(b.min || b.max){
+        if(b.km < b.min) color = '#E8942C';
+        else if(b.km > b.max) color = '#4C2E8F';
+        else color = '#12C0AE';
+      }
+      barras += `<rect x="${x}" y="${90-alto}" width="${anchoBarra}" height="${alto}" fill="${color}" rx="3"></rect>`;
+      labels += `<text x="${x+1}" y="102" font-size="8" fill="#8B93A8">${b.label}</text>`;
+    });
+
+    return `<div class="prog-card">
+      <p class="section-label">KM ${vista==='mes'?'POR SEMANA':'POR MES'} (vs. rango pedido)</p>
+      <svg viewBox="0 0 320 110" style="width:100%; height:auto;">
+        <line x1="10" y1="90" x2="310" y2="90" stroke="#E4E9ED" stroke-width="1"></line>
+        ${barras}${labels}
+      </svg>
+      <div style="display:flex; gap:10px; margin-top:8px; font-size:9.5px; color:var(--muted); flex-wrap:wrap;">
+        <span><span style="display:inline-block;width:8px;height:8px;background:#E8942C;border-radius:2px;margin-right:4px;"></span>por debajo</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#12C0AE;border-radius:2px;margin-right:4px;"></span>en rango</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#4C2E8F;border-radius:2px;margin-right:4px;"></span>por encima</span>
+      </div>
+    </div>`;
+  }
+
+  function renderCalendarioMes(hoyD, registrosMes){
+    const anio = hoyD.getFullYear(), mes = hoyD.getMonth();
+    const primerDia = new Date(anio, mes, 1);
+    const diasEnMes = new Date(anio, mes+1, 0).getDate();
+    const offsetInicio = (primerDia.getDay()+6)%7; // lunes=0
+    const porFecha = {};
+    registrosMes.forEach(r => { porFecha[r.fecha] = r.completado; });
+    let celdas = '';
+    for(let i=0;i<offsetInicio;i++) celdas += `<div></div>`;
+    for(let d=1; d<=diasEnMes; d++){
+      const fechaStr = `${anio}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      let color = 'var(--line)';
+      if(fechaStr in porFecha) color = porFecha[fechaStr] ? 'var(--calor)' : '#D64545';
+      celdas += `<div style="width:100%; aspect-ratio:1; border-radius:5px; background:${color};"></div>`;
+    }
+    return `<p class="section-label">CUMPLIMIENTO DEL MES</p>
+      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; max-width:210px; font-size:9px; color:var(--muted); text-align:center;">
+        <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; max-width:210px;">${celdas}</div>
+      <div style="display:flex; gap:12px; margin-top:10px; font-size:9.5px; color:var(--muted);">
+        <span><span style="display:inline-block;width:8px;height:8px;background:var(--calor);border-radius:2px;margin-right:4px;"></span>hecho</span>
+        <span><span style="display:inline-block;width:8px;height:8px;background:#D64545;border-radius:2px;margin-right:4px;"></span>salteado</span>
+      </div>`;
+  }
+
+  function renderBarrasAnio(anio){
+    const MESES = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+    const porMes = Array.from({length:12}, ()=>({c:0,t:0}));
+    REGISTRO.forEach(r => {
+      if(!r.fecha.startsWith(String(anio))) return;
+      const m = parseInt(r.fecha.slice(5,7))-1;
+      porMes[m].t++; if(r.completado) porMes[m].c++;
+    });
+    const maxAltura = 70;
+    let barras = '';
+    porMes.forEach((mDato, i) => {
+      const pct = mDato.t ? mDato.c/mDato.t : 0;
+      const alto = mDato.t ? Math.max(6, pct*maxAltura) : 0;
+      const x = 15 + i*25;
+      const color = pct >= 0.85 ? 'var(--core)'.replace('var(--core)','#4C2E8F') : (pct>=0.6 ? '#12C0AE' : '#2E3AC0');
+      barras += mDato.t ? `<rect x="${x}" y="${90-alto}" width="16" height="${alto}" fill="${color}" rx="3"></rect>` : '';
+    });
+    const labels = MESES.map((m,i)=>`<text x="${15+i*25+2}" y="102" font-size="8" fill="#8B93A8">${m}</text>`).join('');
+    return `<p class="section-label">ADHERENCIA POR MES</p>
+      <svg viewBox="0 0 320 110" style="width:100%; height:auto;">
+        <line x1="10" y1="90" x2="310" y2="90" stroke="#E4E9ED" stroke-width="1"></line>
+        ${barras}${labels}
+      </svg>`;
+  }
+
+  function renderLineaSVG(valores){
+    if(!valores.length) return '';
+    const min = Math.min(...valores), max = Math.max(...valores);
+    const rango = (max-min) || 1;
+    const w = 300, h = 70, pad = 10;
+    const pts = valores.map((v,i) => {
+      const x = pad + (i/(valores.length-1||1)) * (w-2*pad);
+      const y = pad + (1-(v-min)/rango) * (h-2*pad);
+      return `${x},${y}`;
+    });
+    const circles = pts.map(p => { const [x,y]=p.split(','); return `<circle cx="${x}" cy="${y}" r="3.5" fill="#4C2E8F"></circle>`; }).join('');
+    return `<svg viewBox="0 0 ${w} ${h+20}" style="width:100%; height:auto;">
+      <polyline points="${pts.join(' ')}" fill="none" stroke="#4C2E8F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      ${circles}
+      <text x="0" y="${h+18}" font-size="9" fill="#5C6470">${min}kg</text>
+      <text x="${w-24}" y="${h+18}" font-size="9" fill="#5C6470">${max}kg</text>
+    </svg>`;
+  }
+
+  function formatMesLargo(fechaISO){
+    if(!fechaISO) return '';
+    const d = new Date(fechaISO+'T00:00:00');
+    return d.toLocaleDateString('es-AR', {month:'long', year:'numeric'});
+  }
+  function formatFechaLarga(fechaISO){
+    if(!fechaISO) return '';
+    const d = new Date(fechaISO+'T00:00:00');
+    return d.toLocaleDateString('es-AR', {day:'numeric', month:'long'});
+  }
+
+  function goTab(name){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(n=>n.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    document.getElementById('nav-'+name).classList.add('active');
+  }
+
+  function formatSemana(fechaISO){
+    const d = new Date(fechaISO+'T00:00:00');
+    const fin = new Date(d); fin.setDate(d.getDate()+6);
+    return `Semana del ${d.toLocaleDateString('es-AR',{day:'numeric'})} al ${fin.toLocaleDateString('es-AR',{day:'numeric',month:'long'})}`;
+  }
+
+  cargarAtleta();
+
+  // ------------------------------------------------------------
+  // INSTALACIÓN COMO APP (PWA)
+  // ------------------------------------------------------------
+  let deferredPrompt = null;
+  const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const yaInstalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+
+  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; });
+
+  function mostrarBannerInstalacion(){
+    if(yaInstalada || localStorage.getItem('gravity_banner_cerrado')) return;
+    if(esIOS){
+      document.getElementById('installTxt').textContent = 'Para instalar: tocá el ícono de Compartir de Safari y elegí "Agregar a inicio".';
+      document.getElementById('installBanner').style.display = 'flex';
+    } else if(deferredPrompt){
+      document.getElementById('installBanner').style.display = 'flex';
+      document.getElementById('installBtn').style.display = 'inline-block';
+    }
+  }
+  function instalarApp(){ if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt=null; document.getElementById('installBanner').style.display='none'; }
+  function cerrarBanner(){ document.getElementById('installBanner').style.display='none'; localStorage.setItem('gravity_banner_cerrado','1'); }
+
+  // Botón permanente en Perfil — siempre disponible, sin importar si
+  // Chrome decide o no ofrecer el atajo automático (por ejemplo, si el
+  // atleta ya había instalado y desinstaló la app antes).
+  function abrirInstalacion(){
+    if(yaInstalada){
+      alert('Ya la tenés instalada — buscá el ícono de Gravity en tu pantalla de inicio.');
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+      return;
+    }
+    const help = document.getElementById('installHelp');
+    if(esIOS){
+      help.innerHTML = '<b>Para instalar en iPhone:</b><br>1. Tocá el ícono de Compartir (el cuadrado con la flecha) en Safari.<br>2. Elegí "Agregar a inicio".';
+    } else {
+      help.innerHTML = '<b>Para instalar:</b><br>1. Tocá los tres puntitos (⋮) arriba a la derecha del navegador.<br>2. Elegí "Agregar a pantalla de inicio" o "Instalar app".<br><br>Si no ves esa opción, puede que Chrome ya "recuerde" que la tuviste instalada antes — buscá el ícono de Gravity en tu pantalla de inicio, puede que siga ahí.';
+    }
+    help.style.display = help.style.display === 'none' ? 'block' : 'none';
+  }
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{ navigator.serviceWorker.register('/service-worker.js').catch(()=>{}); });
+  }
+
+  // ------------------------------------------------------------
+  // NOTIFICACIONES PUSH — avisar los días que el atleta entrena
+  // ------------------------------------------------------------
+  const VAPID_PUBLIC_KEY = 'TU_VAPID_PUBLIC_KEY';
+
+  function urlBase64ToUint8Array(base64String){
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  }
+
+  async function activarNotificaciones(){
+    const msg = document.getElementById('notifMsg');
+    msg.style.display = 'block';
+
+    if(!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)){
+      msg.style.color = '#B3372E';
+      msg.textContent = 'Tu navegador no permite notificaciones. Probá desde Chrome.';
+      return;
+    }
+    const permiso = await Notification.requestPermission();
+    if(permiso !== 'granted'){
+      msg.style.color = '#B3372E';
+      msg.textContent = 'No diste permiso — podés activarlo más tarde desde la configuración del navegador.';
+      return;
+    }
+
+    try{
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+      const recordado = JSON.parse(localStorage.getItem('gravity_atleta')||'null');
+      if(!recordado) return;
+      const subJson = sub.toJSON();
+      const { data, error } = await sb.functions.invoke(FUNCION_GUARDAR, { body: {
+        slug: recordado.slug, pin: recordado.pin, tipo: 'push_subscribe',
+        endpoint: subJson.endpoint, p256dh: subJson.keys.p256dh, authKey: subJson.keys.auth,
+      }});
+      if(error || !data || data.error){
+        msg.style.color = '#B3372E'; msg.textContent = 'No se pudo activar. Probá de nuevo.';
+        return;
+      }
+      msg.style.color = '#0B8F82';
+      msg.textContent = '¡Listo! Te vamos a avisar los días que tengas entreno.';
+    }catch(e){
+      msg.style.color = '#B3372E'; msg.textContent = 'No se pudo activar. Probá de nuevo.';
+    }
+  }
+</script>
+</body>
+</html>

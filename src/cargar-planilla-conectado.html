@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Run Club — Cargar planilla</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --teal: #12C0AE; --blue: #2E3AC0; --blue-deep: #1A1F6E;
+    --brand: #2E3AC0; --brand-2: #1A1F6E;
+    --ink: #0B1024; --paper: #F2F6F8; --card: #ffffff; --line: #E4E9ED; --muted: #5C6470;
+    --ok: #1E7A46; --ok-bg: #e7f2e6; --warn: #a86412; --warn-bg: #fbf0dd;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E4E9ED; font-family: 'Nunito', sans-serif; display: flex; justify-content: center; padding: 32px 16px; }
+  .app { width: 100%; max-width: 900px; background: var(--paper); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(16,35,63,0.18); }
+  .topbar { background: linear-gradient(135deg, var(--teal), var(--blue) 68%, var(--blue-deep)); color: #fff; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; color: #bcd0f2; }
+  .crumb { font-size: 13px; color: #cddaf0; margin-top: 2px; }
+  .back-btn { font-family: 'Nunito'; font-weight: 700; font-size: 13px; color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); padding: 7px 13px; border-radius: 20px; text-decoration: none; white-space: nowrap; }
+  .back-btn:hover { background: rgba(255,255,255,.3); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--brand-2); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+
+  .content { padding: 28px; }
+  h1 { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .subtitle { font-size: 13.5px; color: var(--muted); margin: 0 0 24px; }
+
+  #dropzone { border: 1.5px dashed #c7c2b3; border-radius: 14px; background: var(--card); padding: 44px 20px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+  #dropzone:hover { border-color: var(--brand); background: #fbfaf6; }
+  #dropzone .ic { font-size: 30px; color: var(--brand); margin-bottom: 10px; display:block; }
+  #dropzone .main-txt { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  #dropzone .sub-txt { font-size: 13px; color: var(--muted); }
+  #fileInput { display: none; }
+
+  #uploading { display: none; background: var(--card); border-radius: 14px; border: 1px solid var(--line); padding: 24px 28px; }
+  .file-row { display: flex; align-items: center; gap: 12px; }
+  .file-ic { font-size: 22px; color: var(--brand); }
+  .file-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .file-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .progress-track { height: 5px; background: var(--line); border-radius: 3px; margin-top: 14px; overflow: hidden; }
+  .progress-bar { height: 100%; width: 0%; background: var(--brand); border-radius: 3px; transition: width .5s ease; }
+
+  #results, #errorbox { display: none; }
+  #errorbox { background: #fdeceb; border: 1px solid #e8b3ac; border-radius: 12px; padding: 16px 18px; color: #9c2f24; font-size: 13.5px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 22px 0; }
+  .stat-box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat-num { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); }
+  .stat-label { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .stat-box.warn .stat-num { color: var(--warn); }
+
+  .section-label { font-size: 12.5px; font-weight: 600; color: var(--muted); margin: 22px 2px 10px; }
+
+  .row-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .row-card.warn { border-color: #e8cf9a; background: #fffaf0; }
+  .status-ic { font-size: 18px; flex-shrink: 0; }
+  .status-ic.ok { color: var(--ok); }
+  .status-ic.warn { color: var(--warn); }
+  .row-main { flex: 1; min-width: 0; }
+  .row-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .row-detail { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .row-detail.warn-txt { color: var(--warn); font-weight: 500; }
+  .row-days { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .actions { display: flex; gap: 10px; margin-top: 26px; justify-content: flex-end; }
+  .btn { font-family: 'Nunito', sans-serif; font-size: 13.5px; font-weight: 600; padding: 11px 18px; border-radius: 10px; cursor: pointer; border: none; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:disabled { background: #b9c3d3; cursor: not-allowed; }
+  .publish-note { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: right; }
+
+  #publishedbox { display:none; background:#e7f2e6; border:1px solid #a9cfa4; border-radius:12px; padding:16px 18px; color:#2c5a2c; font-size:13.5px; margin-top:20px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="perfil-entrenador.html" class="back-btn">← Panel</a>
+      <div>
+        <div class="brand">GRAVITY RUN CLUB · PANEL DEL COACH</div>
+        <div class="crumb">Cargar planilla</div>
+      </div>
+    </div>
+    <div class="avatar">ES</div>
+  </div>
+
+  <div class="content">
+
+    <div id="loginBox">
+      <h1>Ingresar</h1>
+      <p class="subtitle">Iniciá sesión para cargar la planilla de la semana.</p>
+      <div style="max-width:340px;">
+        <input id="loginEmail" type="email" placeholder="Email" style="width:100%; padding:11px 13px; margin-bottom:10px; border:1px solid var(--line); border-radius:10px; font-size:13.5px; font-family:'Inter',sans-serif;">
+        <input id="loginPass" type="password" placeholder="Contraseña" style="width:100%; padding:11px 13px; margin-bottom:14px; border:1px solid var(--line); border-radius:10px; font-size:13.5px; font-family:'Inter',sans-serif;">
+        <button class="btn btn-primary" style="width:100%;" onclick="iniciarSesion()">Ingresar</button>
+        <div id="loginError" style="color:#9c2f24; font-size:12.5px; margin-top:10px; display:none;"></div>
+      </div>
+    </div>
+
+    <div id="mainApp" style="display:none;">
+    <h1>Cargar planilla semanal</h1>
+    <p class="subtitle">Subí el Excel del subgrupo (hoja "Plan Semanal") o de Preparación Física (hoja "Plan Fuerza Semanal") — se detecta solo. Vas a poder revisar lo detectado antes de que se publique en los portales.</p>
+
+    <div id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <i class="ti ti-cloud-upload ic"></i>
+      <div class="main-txt">Arrastrá tu archivo acá o hacé clic para buscarlo</div>
+      <div class="sub-txt">Formato .xlsx — mismo formato que usás siempre</div>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx" onchange="handleFile(this.files[0])">
+
+    <div id="uploading">
+      <div class="file-row">
+        <i class="ti ti-file-spreadsheet file-ic"></i>
+        <div><div class="file-name" id="fileNameLabel">archivo.xlsx</div><div class="file-sub" id="uploadStatus">Leyendo la planilla…</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <div id="errorbox"></div>
+
+    <div id="results">
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div id="warnList"></div>
+      <div id="okList"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="resetUpload()">Cargar otro archivo</button>
+        <button class="btn btn-primary" id="publishBtn" onclick="publicar()">Publicar cambios</button>
+      </div>
+      <div class="publish-note" id="publishNote"></div>
+    </div>
+
+    <div id="publishedbox"></div>
+    </div><!-- /mainApp -->
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Nombre real de la Edge Function de notificaciones — actualizar
+  // después de desplegarla, con el nombre que Supabase le asigne.
+  const FUNCION_NOTIFICACIONES = 'notificaciones-function';
+
+  let rosterAtletas = [];   // atletas de la base, para hacer matching
+  let filasParseadas = [];  // resultado del parseo, listo para revisar/publicar
+  let MODO_ACTUAL = 'running'; // 'running' | 'fuerza' — detectado según la hoja del archivo
+
+  // ------------------------------------------------------------
+  // LOGIN — Eze necesita sesión iniciada para que RLS le permita
+  // leer y escribir en las tablas.
+  // ------------------------------------------------------------
+  async function iniciarSesion() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'none';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      errBox.textContent = 'No pudimos iniciar sesión: ' + error.message;
+      errBox.style.display = 'block';
+      return;
+    }
+    mostrarApp();
+  }
+
+  function mostrarApp() {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+  }
+
+  // Si ya había una sesión activa (recargó la página), la reusa
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) mostrarApp();
+  });
+
+  function levenshtein(a, b) {
+    a = a.toLowerCase(); b = b.toLowerCase();
+    const m = a.length, n = b.length;
+    const d = Array.from({length: m+1}, (_, i) => [i, ...Array(n).fill(0)]);
+    for (let j = 0; j <= n; j++) d[0][j] = j;
+    for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) {
+      d[i][j] = a[i-1] === b[j-1] ? d[i-1][j-1] : 1 + Math.min(d[i-1][j], d[i][j-1], d[i-1][j-1]);
+    }
+    return d[m][n];
+  }
+
+  function sugerirAtleta(nombre) {
+    let mejor = null, mejorDist = Infinity;
+    for (const a of rosterAtletas) {
+      const dist = levenshtein(nombre, a.nombre);
+      if (dist < mejorDist) { mejorDist = dist; mejor = a; }
+    }
+    return mejorDist <= 3 ? mejor : null;
+  }
+
+  function parseFechaSemana(val) {
+    if (val instanceof Date) return val.toISOString().slice(0,10);
+    if (typeof val === 'string') {
+      const m = val.trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+      if (m) {
+        let [, d, mo, y] = m;
+        if (y.length === 2) y = '20' + y;
+        return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+      }
+    }
+    return null;
+  }
+
+  // Calcula el lunes de la semana que contiene una fecha dada.
+  // Así, sin importar si Eze pone la fecha real de cada día o repite
+  // el lunes en las 7 filas, todos los días de una misma semana quedan
+  // agrupados juntos.
+  function lunesDeLaSemana(fechaISO) {
+    if (!fechaISO) return null;
+    const d = new Date(fechaISO + 'T00:00:00Z');
+    const diaSemana = d.getUTCDay(); // 0=Domingo, 1=Lunes ... 6=Sábado
+    const offset = diaSemana === 0 ? -6 : 1 - diaSemana;
+    d.setUTCDate(d.getUTCDate() + offset);
+    return d.toISOString().slice(0,10);
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    document.getElementById('dropzone').style.display = 'none';
+    document.getElementById('uploading').style.display = 'block';
+    document.getElementById('fileNameLabel').textContent = file.name;
+    document.getElementById('errorbox').style.display = 'none';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('publishedbox').style.display = 'none';
+    const bar = document.getElementById('progressBar');
+    const status = document.getElementById('uploadStatus');
+    bar.style.width = '20%';
+
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const esFuerza = wb.SheetNames.some(n => n.trim().toLowerCase() === 'plan fuerza semanal');
+      MODO_ACTUAL = esFuerza ? 'fuerza' : 'running';
+
+      if (esFuerza) {
+        await procesarPlanFuerza(wb, file.name);
+        return;
+      }
+
+      const sheetName = wb.SheetNames.find(n => n.trim().toLowerCase() === 'plan semanal') || wb.SheetNames[0];
+      const sheet = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+      bar.style.width = '55%';
+      status.textContent = 'Detectando atletas y validando filas…';
+
+      const { data: atletas, error: errAtletas } = await sb.from('atletas').select('id, nombre, subgrupo, slug').eq('activo', true).eq('tiene_running', true);
+      if (errAtletas) throw new Error('No se pudo conectar con la base: ' + errAtletas.message);
+      rosterAtletas = atletas;
+
+      const parsed = rows.map(r => {
+        const atletaNombre = String(r['Atleta'] || '').trim();
+        const esPlanMadre = atletaNombre.toUpperCase().startsWith('PLAN MADRE');
+        const semanaISO = lunesDeLaSemana(parseFechaSemana(r['Semana']));
+        const tipo = String(r['Tipo'] || '').trim();
+        const descripcion = String(r['Descripción'] || '').trim();
+
+        let warnings = [];
+        let atletaMatch = null;
+        if (!esPlanMadre) {
+          const subgrupoFila = String(r['Subgrupo'] || '').trim().toLowerCase();
+          const candidatos = rosterAtletas.filter(a => a.nombre.trim().toLowerCase() === atletaNombre.toLowerCase());
+          if (candidatos.length === 1) {
+            atletaMatch = candidatos[0];
+          } else if (candidatos.length > 1) {
+            // Nombre repetido en más de un atleta -> desambiguar por subgrupo
+            atletaMatch = candidatos.find(a => a.subgrupo.trim().toLowerCase() === subgrupoFila);
+            if (!atletaMatch) {
+              warnings.push(`Hay ${candidatos.length} atletas llamados "${atletaNombre}" y ninguno coincide con el subgrupo "${r['Subgrupo']}" de esta fila — revisar a mano cuál corresponde.`);
+            }
+          }
+          if (!atletaMatch && !candidatos.length) {
+            const sugerido = sugerirAtleta(atletaNombre);
+            warnings.push(sugerido
+              ? `"${atletaNombre}" no coincide con ningún atleta del roster. ¿Quisiste decir "${sugerido.nombre}"?`
+              : `"${atletaNombre}" no coincide con ningún atleta del roster.`);
+          }
+          if (tipo === 'Entreno' && !descripcion) {
+            warnings.push(`${atletaNombre} — ${r['Día']}: marcado como "Entreno" sin descripción.`);
+          }
+          if (!semanaISO) {
+            warnings.push(`${atletaNombre} — ${r['Día']}: la fecha de "Semana" no se pudo leer.`);
+          }
+        }
+
+        return {
+          esPlanMadre, atletaNombre, atletaMatch, semanaISO,
+          dia: r['Día'], fase: r['Fase'] || null, tipo, zona: r['Zona'] || null, sesion: r['Sesión'] || null,
+          descripcion, distMin: r['Dist. min (km)'] || null, distMax: r['Dist. max (km)'] || null,
+          warnings
+        };
+      }).filter(r => !r.esPlanMadre && r.atletaNombre);
+
+      // Detecta filas duplicadas dentro del mismo archivo (mismo atleta,
+      // misma semana, mismo día repetido dos veces) — la segunda pisaría
+      // a la primera en silencio si no avisamos acá.
+      const vistos = new Map();
+      parsed.forEach(r => {
+        if (!r.atletaMatch || !r.semanaISO) return;
+        const key = `${r.atletaMatch.id}|${r.semanaISO}|${r.dia}|${r.fase||''}`;
+        if (vistos.has(key)) {
+          const original = vistos.get(key);
+          const msg = `${r.atletaNombre} — ${r.dia}: aparece repetido en el archivo (más de una fila para el mismo día). Solo se va a publicar el último.`;
+          if (!original.warnings.includes(msg)) original.warnings.push(msg);
+          r.warnings.push(msg);
+        } else {
+          vistos.set(key, r);
+        }
+      });
+
+      filasParseadas = parsed;
+      bar.style.width = '100%';
+      setTimeout(() => {
+        document.getElementById('uploading').style.display = 'none';
+        mostrarResultados(file.name, parsed);
+      }, 300);
+
+    } catch (e) {
+      document.getElementById('uploading').style.display = 'none';
+      const box = document.getElementById('errorbox');
+      box.style.display = 'block';
+      box.innerHTML = `<b>No pudimos leer el archivo.</b><br>${e.message}`;
+    }
+  }
+
+  function mostrarResultados(fileName, parsed) {
+    const conWarnings = parsed.filter(r => r.warnings.length);
+    const okRows = parsed.filter(r => !r.warnings.length);
+    const atletasDetectados = [...new Set(parsed.map(r => r.atletaNombre))];
+    const subgruposDetectados = [...new Set(okRows.map(r => r.atletaMatch ? r.atletaMatch.subgrupo : null).filter(Boolean))];
+
+    document.getElementById('summaryGrid').innerHTML = `
+      <div class="stat-box"><div class="stat-num">${subgruposDetectados.length}</div><div class="stat-label">subgrupo${subgruposDetectados.length===1?'':'s'} detectado${subgruposDetectados.length===1?'':'s'}</div></div>
+      <div class="stat-box"><div class="stat-num">${atletasDetectados.length}</div><div class="stat-label">atletas encontrados</div></div>
+      <div class="stat-box"><div class="stat-num">${parsed.length}</div><div class="stat-label">días cargados</div></div>
+      <div class="stat-box ${conWarnings.length?'warn':''}"><div class="stat-num">${conWarnings.length}</div><div class="stat-label">advertencias</div></div>
+    `;
+
+    let warnHTML = '';
+    if (conWarnings.length) {
+      warnHTML += '<p class="section-label">Advertencias — revisar antes de publicar</p>';
+      conWarnings.forEach(r => {
+        r.warnings.forEach(w => {
+          warnHTML += `<div class="row-card warn"><i class="ti ti-alert-triangle status-ic warn"></i><div class="row-main"><div class="row-title">${r.atletaNombre} · ${r.dia}</div><div class="row-detail warn-txt">${w}</div></div></div>`;
+        });
+      });
+    }
+    document.getElementById('warnList').innerHTML = warnHTML;
+
+    const porAtleta = {};
+    okRows.forEach(r => { (porAtleta[r.atletaNombre] = porAtleta[r.atletaNombre] || []).push(r); });
+    let okHTML = '<p class="section-label">Listos para publicar</p>';
+    Object.entries(porAtleta).forEach(([nombre, filas]) => {
+      okHTML += `<div class="row-card"><i class="ti ti-circle-check status-ic ok"></i><div class="row-main"><div class="row-title">${nombre}</div><div class="row-detail">${filas[0].atletaMatch.subgrupo} · ${filas.filter(f=>f.tipo==='Entreno').length} sesiones, ${filas.filter(f=>f.tipo==='Descanso').length} descansos</div></div><span class="row-days">${filas.length} días</span></div>`;
+    });
+    document.getElementById('okList').innerHTML = Object.keys(porAtleta).length ? okHTML : '';
+
+    const publishBtn = document.getElementById('publishBtn');
+    const note = document.getElementById('publishNote');
+    publishBtn.disabled = okRows.length === 0;
+    if (conWarnings.length) {
+      note.textContent = `Se van a publicar ${okRows.length} días sin problemas. Las filas con advertencia (${conWarnings.length}) no se publican hasta corregirlas.`;
+    } else {
+      note.textContent = `Todo listo — se van a publicar ${okRows.length} días.`;
+    }
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').dataset.fileName = fileName;
+  }
+
+  async function publicar() {
+    const okRows = filasParseadas.filter(r => !r.warnings.length);
+    const fileName = document.getElementById('results').dataset.fileName;
+    const publishBtn = document.getElementById('publishBtn');
+    publishBtn.disabled = true;
+    publishBtn.textContent = 'Publicando…';
+
+    // Limpieza: borra cualquier resto de esa misma semana calendario para
+    // cada atleta antes de guardar lo nuevo. Esto es lo que evita que
+    // queden filas "huérfanas" pegadas de una carga anterior (por ejemplo,
+    // de cuando una fecha se había interpretado mal).
+    const atletaSemanas = [...new Set(okRows.map(r => `${r.atletaMatch.id}|${r.semanaISO}`))];
+    for (const key of atletaSemanas) {
+      const [atletaId, semanaMonday] = key.split('|');
+      const inicio = new Date(semanaMonday + 'T00:00:00Z');
+      const fin = new Date(inicio); fin.setUTCDate(fin.getUTCDate() + 6);
+      const { error: errDelete } = await sb.from('planes_semanales')
+        .delete()
+        .eq('atleta_id', atletaId)
+        .gte('semana_inicio', inicio.toISOString().slice(0,10))
+        .lte('semana_inicio', fin.toISOString().slice(0,10));
+      if (errDelete) console.error('Error limpiando semana previa:', errDelete);
+    }
+
+    const upsertRows = okRows.map(r => ({
+      atleta_id: r.atletaMatch.id,
+      semana_inicio: r.semanaISO,
+      dia: r.dia,
+      fase: r.fase || null,
+      tipo: r.tipo,
+      zona: r.zona || null,
+      sesion: r.sesion || null,
+      descripcion: r.descripcion || null,
+      dist_min_km: r.distMin || null,
+      dist_max_km: r.distMax || null
+    }));
+
+    const { error: errUpsert } = await sb.from('planes_semanales')
+      .insert(upsertRows);
+
+    const conWarnings = filasParseadas.filter(r => r.warnings.length);
+    await sb.from('cargas').insert({
+      archivo_nombre: fileName,
+      filas_totales: filasParseadas.length,
+      filas_publicadas: errUpsert ? 0 : upsertRows.length,
+      filas_advertencia: conWarnings.length,
+      detalle_advertencias: conWarnings.map(r => ({ atleta: r.atletaNombre, dia: r.dia, warnings: r.warnings })),
+      estado: errUpsert ? 'error' : (conWarnings.length ? 'con_advertencias' : 'procesado')
+    });
+
+    const box = document.getElementById('publishedbox');
+    box.style.display = 'block';
+    if (errUpsert) {
+      box.style.background = '#fdeceb'; box.style.color = '#9c2f24'; box.style.borderColor = '#e8b3ac';
+      box.innerHTML = `<b>Hubo un error al publicar.</b><br>${errUpsert.message}`;
+    } else {
+      box.innerHTML = `<b>¡Listo!</b> Se publicaron ${upsertRows.length} días en los portales de los atletas.`;
+      // Avisa por notificación push a los atletas que recibieron plan nuevo
+      // (si no activaron las notificaciones, esto simplemente no hace nada).
+      const idsAvisar = [...new Set(upsertRows.map(r => r.atleta_id))];
+      if(idsAvisar.length){
+        sb.functions.invoke(FUNCION_NOTIFICACIONES, { body: { tipo: 'plan_nuevo', atletaIds: idsAvisar } }).catch(()=>{});
+      }
+    }
+    publishBtn.textContent = 'Publicar cambios';
+  }
+
+  function resetUpload() {
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('errorbox').style.display = 'none';
+    document.getElementById('publishedbox').style.display = 'none';
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('uploadStatus').textContent = 'Leyendo la planilla…';
+    document.getElementById('dropzone').style.display = 'block';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('publishBtn').setAttribute('onclick', 'publicar()');
+    MODO_ACTUAL = 'running';
+  }
+
+  // ==============================================================
+  // MODO FUERZA — Preparación Física (bloques de ejercicios)
+  // ==============================================================
+  let filasFuerzaParseadas = [];
+
+  async function procesarPlanFuerza(wb, fileName) {
+    const bar = document.getElementById('progressBar');
+    const status = document.getElementById('uploadStatus');
+    const sheetName = wb.SheetNames.find(n => n.trim().toLowerCase() === 'plan fuerza semanal');
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+    bar.style.width = '55%';
+    status.textContent = 'Detectando atletas de Preparación Física…';
+
+    const { data: atletas, error: errAtletas } = await sb.from('atletas').select('id, nombre, subgrupo, slug').eq('activo', true).eq('nivel_fuerza', 'completo');
+    if (errAtletas) throw new Error('No se pudo conectar con la base: ' + errAtletas.message);
+    rosterAtletas = atletas;
+
+    const parsed = rows.map(r => {
+      const atletaNombre = String(r['Atleta'] || '').trim();
+      const semanaISO = parseFechaSemana(r['Semana']);
+      const ejercicio = String(r['Ejercicio'] || '').trim();
+      const bloque = String(r['Bloque'] || '').trim();
+      const tipo = String(r['Tipo'] || '').trim();
+
+      let warnings = [];
+      let atletaMatch = null;
+      if (atletaNombre) {
+        atletaMatch = rosterAtletas.find(a => a.nombre.trim().toLowerCase() === atletaNombre.toLowerCase());
+        if (!atletaMatch) {
+          const sugerido = sugerirAtleta(atletaNombre);
+          warnings.push(sugerido
+            ? `"${atletaNombre}" no coincide con ningún atleta de Preparación Física. ¿Quisiste decir "${sugerido.nombre}"?`
+            : `"${atletaNombre}" no coincide con ningún atleta de Preparación Física.`);
+        }
+        if (!bloque) warnings.push(`${atletaNombre}: falta el "Bloque" (Día 1, Día 2...).`);
+        if (!ejercicio) warnings.push(`${atletaNombre} — ${bloque}: falta el nombre del ejercicio.`);
+        if (!semanaISO) warnings.push(`${atletaNombre} — ${bloque}: la fecha de "Semana" no se pudo leer.`);
+      }
+
+      return {
+        atletaNombre, atletaMatch, semanaISO, bloque, tipo, ejercicio,
+        series: r['Serie'] || null, repeticiones: r['Rep'] || null, peso: r['Peso'] || null,
+        detalle: r['Detalle'] || null, orden: r['Orden'] || 0,
+        warnings
+      };
+    }).filter(r => r.atletaNombre && r.ejercicio);
+
+    filasFuerzaParseadas = parsed;
+    bar.style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('uploading').style.display = 'none';
+      mostrarResultadosFuerza(fileName, parsed);
+    }, 300);
+  }
+
+  function mostrarResultadosFuerza(fileName, parsed) {
+    const conWarnings = parsed.filter(r => r.warnings.length);
+    const okRows = parsed.filter(r => !r.warnings.length);
+    const atletasDetectados = [...new Set(parsed.map(r => r.atletaNombre))];
+
+    document.getElementById('summaryGrid').innerHTML = `
+      <div class="stat-box"><div class="stat-num">🏋️</div><div class="stat-label">plan de fuerza</div></div>
+      <div class="stat-box"><div class="stat-num">${atletasDetectados.length}</div><div class="stat-label">atletas encontrados</div></div>
+      <div class="stat-box"><div class="stat-num">${parsed.length}</div><div class="stat-label">ejercicios cargados</div></div>
+      <div class="stat-box ${conWarnings.length?'warn':''}"><div class="stat-num">${conWarnings.length}</div><div class="stat-label">advertencias</div></div>
+    `;
+
+    let warnHTML = '';
+    if (conWarnings.length) {
+      warnHTML += '<p class="section-label">Advertencias — revisar antes de publicar</p>';
+      conWarnings.forEach(r => r.warnings.forEach(w => {
+        warnHTML += `<div class="row-card warn"><i class="ti ti-alert-triangle status-ic warn"></i><div class="row-main"><div class="row-title">${r.atletaNombre} · ${r.bloque||'—'}</div><div class="row-detail warn-txt">${w}</div></div></div>`;
+      }));
+    }
+    document.getElementById('warnList').innerHTML = warnHTML;
+
+    const porAtleta = {};
+    okRows.forEach(r => { (porAtleta[r.atletaNombre] = porAtleta[r.atletaNombre] || []).push(r); });
+    let okHTML = '<p class="section-label">Listos para publicar</p>';
+    Object.entries(porAtleta).forEach(([nombre, filas]) => {
+      const bloques = [...new Set(filas.map(f=>f.bloque))];
+      okHTML += `<div class="row-card"><i class="ti ti-circle-check status-ic ok"></i><div class="row-main"><div class="row-title">${nombre}</div><div class="row-detail">Preparación Física · ${bloques.length} bloques, ${filas.length} ejercicios</div></div></div>`;
+    });
+    document.getElementById('okList').innerHTML = Object.keys(porAtleta).length ? okHTML : '';
+
+    const publishBtn = document.getElementById('publishBtn');
+    const note = document.getElementById('publishNote');
+    publishBtn.disabled = okRows.length === 0;
+    publishBtn.setAttribute('onclick', 'publicarFuerza()');
+    note.textContent = conWarnings.length
+      ? `Se van a publicar ${okRows.length} ejercicios sin problemas. Las filas con advertencia (${conWarnings.length}) no se publican hasta corregirlas.`
+      : `Todo listo — se van a publicar ${okRows.length} ejercicios.`;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').dataset.fileName = fileName;
+  }
+
+  async function publicarFuerza() {
+    const okRows = filasFuerzaParseadas.filter(r => !r.warnings.length);
+    const fileName = document.getElementById('results').dataset.fileName;
+    const publishBtn = document.getElementById('publishBtn');
+    publishBtn.disabled = true;
+    publishBtn.textContent = 'Publicando…';
+
+    // Se borra y recarga por atleta+semana, para no duplicar si se sube dos veces
+    const atletaSemanas = [...new Set(okRows.map(r => `${r.atletaMatch.id}|${r.semanaISO}`))];
+    for (const key of atletaSemanas) {
+      const [atletaId, semana] = key.split('|');
+      await sb.from('planes_fuerza_semanales').delete().eq('atleta_id', atletaId).eq('semana_inicio', semana);
+    }
+
+    const insertRows = okRows.map(r => ({
+      atleta_id: r.atletaMatch.id,
+      semana_inicio: r.semanaISO,
+      bloque: r.bloque,
+      tipo: r.tipo || 'Ejercicio',
+      ejercicio: r.ejercicio,
+      series: r.series || null,
+      repeticiones: r.repeticiones || null,
+      peso: r.peso || null,
+      detalle: r.detalle || null,
+      orden: r.orden || 0
+    }));
+
+    const { error: errInsert } = await sb.from('planes_fuerza_semanales').insert(insertRows);
+
+    const conWarnings = filasFuerzaParseadas.filter(r => r.warnings.length);
+    await sb.from('cargas').insert({
+      archivo_nombre: fileName,
+      filas_totales: filasFuerzaParseadas.length,
+      filas_publicadas: errInsert ? 0 : insertRows.length,
+      filas_advertencia: conWarnings.length,
+      detalle_advertencias: conWarnings.map(r => ({ atleta: r.atletaNombre, bloque: r.bloque, warnings: r.warnings })),
+      estado: errInsert ? 'error' : (conWarnings.length ? 'con_advertencias' : 'procesado')
+    });
+
+    const box = document.getElementById('publishedbox');
+    box.style.display = 'block';
+    if (errInsert) {
+      box.style.background = '#fdeceb'; box.style.color = '#9c2f24'; box.style.borderColor = '#e8b3ac';
+      box.innerHTML = `<b>Hubo un error al publicar.</b><br>${errInsert.message}`;
+    } else {
+      box.innerHTML = `<b>¡Listo!</b> Se publicaron ${insertRows.length} ejercicios en los portales.`;
+      const idsAvisar = [...new Set(insertRows.map(r => r.atleta_id))];
+      if(idsAvisar.length){
+        sb.functions.invoke(FUNCION_NOTIFICACIONES, { body: { tipo: 'plan_nuevo', atletaIds: idsAvisar } }).catch(()=>{});
+      }
+    }
+    publishBtn.textContent = 'Publicar cambios';
+    publishBtn.setAttribute('onclick', 'publicar()'); // vuelve al modo default para la próxima carga
+  }
+</script>
+</body>
+</html>
